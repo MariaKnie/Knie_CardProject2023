@@ -44,7 +44,7 @@ namespace Knie_CardProject2023
         public virtual Card GenerateCard()
         {
 
-            return null;
+            return null; //Kommentar
         }
 
 
