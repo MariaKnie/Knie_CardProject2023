@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Knie_CardProject2023.Monstercard">
+    <Position X="6.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAA=</HashCode>
+      <FileName>Monstercard.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Knie_CardProject2023.Card">
+    <Position X="4.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABACAAAAAgAAAAAAAAAQAAIAEAAAAAAgCAAAAAgA=</HashCode>
+      <FileName>Card.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Knie_CardProject2023.SpellCard">
+    <Position X="2" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAA=</HashCode>
+      <FileName>SpellCard.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
