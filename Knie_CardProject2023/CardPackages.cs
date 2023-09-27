@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Knie_CardProject2023
 
         private int max_HandOutSize = 5;
 
-        public CardStack BuyPackage(CardStack userstack )
+        public void CreatePackage(CardStack userstack, out int cardscreated)
         {
 
             for (int i = 0; i < max_HandOutSize; i++)
@@ -37,8 +38,9 @@ namespace Knie_CardProject2023
 
                 userstack.Cards[userstack.Cards.Count - 1].PrintCard();
             }
+                cardscreated = max_HandOutSize;
+                Console.WriteLine(cardscreated.ToString());
 
-                return userstack;
         }
     }
 }
