@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023
 {
-    internal class CardStack
+    public class CardStack
     {
 
         private List<Card> stack = new List<Card>();

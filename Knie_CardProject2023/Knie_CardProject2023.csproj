@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Client\Client.csproj" />
-    <ProjectReference Include="..\Server\Server.csproj" />
+    <Folder Include="Enums\" />
+    <Folder Include="ResponseTypes\" />
   </ItemGroup>
 
 </Project>

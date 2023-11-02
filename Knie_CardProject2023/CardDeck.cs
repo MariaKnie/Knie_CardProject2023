@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023
 {
-    internal class CardDeck
+    public class CardDeck
     {
         List<Card> card_deck= new List<Card>();
         private int max_HandOutSize = 4;

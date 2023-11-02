@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace Knie_CardProject2023
 {
-    internal class User
+    public class User
     {
         private static int nextUserid = 1;
 
