@@ -1,4 +1,6 @@
 ﻿using Server.Server;
+using Server.Server.Requests;
+using Server.Server.UserRequests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,9 +30,10 @@ namespace Knie_CardProject2023.Server
         public static void ReadRequest(StreamWriter writer, StreamReader reader)
         {
             //read requests
-            string? line;
+            string? line = "";
             int contentLength = 0;
 
+            Console.WriteLine();
             Console.WriteLine("\nREQUEST");
 
             line = reader.ReadLine();
@@ -47,35 +50,42 @@ namespace Knie_CardProject2023.Server
             string body = BodyHandler.BodyRead(contentLength, writer, reader);
 
             HTTP_Response response = new HTTP_Response();
+            UserRequests users = new UserRequests();
+            CardRequests cards = new CardRequests();
+            PackagesRequests packages = new PackagesRequests();
+            GeneralRequests general = new GeneralRequests();
             Dictionary<string, StreamWriter> headers = new Dictionary<string, StreamWriter>();
             headers.Add("", response.OkResponse(writer));
             headers.Add("/", response.OkResponse(writer));
 
-            headers.Add("/users", response.UserRequest(writer));
-            headers.Add("/users/altenhof", response.UserRequest(writer));
-            headers.Add("/users/kienboec", response.UserRequest(writer));
+            headers.Add("/users", users.UserRequest(writer, Http_type));
+            headers.Add("/users/", users.UserSpecificRequest(writer, Http_type));
 
-            headers.Add("/packages ", response.PackagesRequest(writer));
-            headers.Add("/cards", response.CardsRequest(writer));
-            headers.Add("/deck", response.DeckRequest(writer));
-            headers.Add("/deck?format=plain", response.DeckPlainRequest(writer));
+            headers.Add("/packages ", packages.PackagesRequest(writer));
+            headers.Add("/cards", cards.CardsRequest(writer,Http_type));
+            headers.Add("/deck", cards.DeckRequest(writer, Http_type));
+            headers.Add("/deck?format=plain", cards.DeckPlainRequest(writer, Http_type));
 
-            headers.Add("/sessions", response.SessionRequest(writer));
-            headers.Add("/stats", response.StatsRequest(writer));
-            headers.Add("/scoreboard", response.ScoreboardRequest(writer));
-            headers.Add("/battles", response.BattleRequest(writer));
+            headers.Add("/sessions", general.SessionRequest(writer));
+            headers.Add("/stats", general.StatsRequest(writer));
+            headers.Add("/scoreboard", general.ScoreboardRequest(writer));
+            headers.Add("/battles", general.BattleRequest(writer));
 
-            headers.Add("/transactions/packages", response.TransactionsPackagesRequest(writer));
-            headers.Add("/tradings", response.TradingsRequest(writer));
-
+            headers.Add("/transactions/packages", packages.TransactionsPackagesRequest(writer));
+            headers.Add("/tradings", general.TradingsRequest(writer));
 
 
 
-         //   HTTP_Response response = new HTTP_Response();
 
-            if (headers.ContainsKey(requestSubPath[1]))
+            //   HTTP_Response response = new HTTP_Response();
+
+            if (headers.ContainsKey(requestSubPath[1])) //specifics routes wont work  -> users/
             {
-               writer = headers[requestSubPath[1]];
+                writer = headers[requestSubPath[1]];
+            }
+            else if (requestSubPath[1].Contains("users/")) //specific User muss noch name übergeben
+            {
+                writer = headers["/users/"];
             }
             else
             {
@@ -83,21 +93,7 @@ namespace Knie_CardProject2023.Server
             }
 
 
-            //switch (requestSubPath[1])
-            //{
-            //    case "users":
-            //        response.UserRequest(writer);
-            //        break;
-            //    case "packages":
-            //        response.PackagesRequest(writer);
-            //        break;
-            //    case "sessions":
-            //        response.SessionRequest(writer);
-            //        break;
-            //    default:
-            //        response.OkResponse(writer);
-            //        break;
-            //}     
+            Console.WriteLine();
 
         }
     }

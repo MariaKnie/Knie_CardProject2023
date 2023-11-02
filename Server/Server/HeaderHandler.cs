@@ -11,7 +11,7 @@ namespace Server.Server
     internal class HeaderHandler
     {
 
-        public static string ReadHeader(int contentLength, StreamWriter writer, StreamReader reader, string line)
+        public static string ReadHeader(int contentLength, StreamWriter writer, StreamReader reader, string? line)
         {
             bool isBody = false;
 
@@ -35,7 +35,7 @@ namespace Server.Server
                 }
             }
 
-            return null;
+            return "";
         }
     }
 }
