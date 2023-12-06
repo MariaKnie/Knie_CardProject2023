@@ -9,12 +9,10 @@ namespace Server.Server.Requests
 {
     internal class GeneralRequests
     {
-        HTTP_Response response = new HTTP_Response();
-        public StreamWriter SessionRequest(StreamWriter writer)
+        public async Task SessionRequest(StreamWriter writer, string requesttype)
         {
-
-            response.UniqueResponse(writer, 200, "Session", "<html> <body> <h1> Session Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"Session {requesttype}", $"<html> <body> <h1> {requesttype} Session Request! </h1> </body> </html>");
         }
 
 
@@ -22,33 +20,36 @@ namespace Server.Server.Requests
 
 
 
-        public StreamWriter StatsRequest(StreamWriter writer)
+        public async Task StatsRequest(StreamWriter writer, string requesttype)
         {
-
-            response.UniqueResponse(writer, 200, "StatsRequest", "<html> <body> <h1> StatsRequest Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"StatsRequest {requesttype}", $"<html> <body> <h1> {requesttype} StatsRequest Request! </h1> </body> </html>");
         }
-        public StreamWriter ScoreboardRequest(StreamWriter writer)
+        public async Task ScoreboardRequest(StreamWriter writer, string requesttype)
         {
-
-            response.UniqueResponse(writer, 200, "ScoreboardRequest", "<html> <body> <h1> ScoreboardRequest Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"ScoreboardRequest {requesttype}", $"<html> <body> <h1> {requesttype} ScoreboardRequest Request! </h1> </body> </html>");
         }
 
 
-        public StreamWriter BattleRequest(StreamWriter writer)
+        public async Task BattleRequest(StreamWriter writer, string requesttype)
         {
-
-            response.UniqueResponse(writer, 200, "BattleRequest", "<html> <body> <h1> BattleRequest Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"BattleRequest {requesttype} ", $"<html> <body> <h1> {requesttype} BattleRequest Request! </h1> </body> </html>");
         }
 
-        public StreamWriter TradingsRequest(StreamWriter writer)
+        public async Task TradingsRequest(StreamWriter writer, string requesttype)
         {
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"TradingsRequest {requesttype}", $"<html> <body> <h1> {requesttype} TradingsRequest Request! </h1> </body> </html>");
 
-            response.UniqueResponse(writer, 200, "TradingsRequest", "<html> <body> <h1> TradingsRequest Request! </h1> </body> </html>");
-            return writer;
         }
-    
+        public async Task SpecificTradingsRequest(StreamWriter writer, string requesttype)
+        {
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"Specific TradingsRequest {requesttype}", $"<html> <body> <h1> {requesttype} Specific TradingsRequest Request! </h1> </body> </html>");
+
+        }
+
     }
 }

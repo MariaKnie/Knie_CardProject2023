@@ -11,13 +11,13 @@ namespace Server.Server
     internal class HeaderHandler
     {
 
-        public static string ReadHeader(int contentLength, StreamWriter writer, StreamReader reader, string? line)
+        public static string ReadHeader(ref int contentLength, ref StreamWriter writer, ref StreamReader reader, ref string? line)
         {
             bool isBody = false;
 
             while ((line = reader.ReadLine()) != null)
             {
-                Console.WriteLine(line); //erste line noch aufspliten und dann htttp protcol, / dann ? dann && || und dann =
+                //Console.WriteLine(line); //erste line noch aufspliten und dann htttp protcol, / dann ? dann && || und dann =
                 if (line == "")
                 {
                     isBody = true;

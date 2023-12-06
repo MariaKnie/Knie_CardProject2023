@@ -10,7 +10,7 @@ namespace Knie_CardProject2023.Server
     internal class BodyHandler
     {
 
-        public static string BodyRead( int contentLength, StreamWriter writer, StreamReader reader)
+        public static string BodyRead( ref int contentLength, ref StreamWriter writer, ref StreamReader reader)
         {
             // read the body if existent
           
@@ -29,7 +29,7 @@ namespace Knie_CardProject2023.Server
 
                     datablock.Append(chars, 0, bytesRead);
                 }
-                Console.WriteLine(datablock.ToString());
+                //Console.WriteLine(datablock.ToString());
 
 
 

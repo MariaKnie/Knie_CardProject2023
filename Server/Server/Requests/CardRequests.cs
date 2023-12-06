@@ -9,49 +9,45 @@ namespace Server.Server
 {
     internal class CardRequests
     {
-        HTTP_Response response = new HTTP_Response();
-
-        public StreamWriter CardsRequest(StreamWriter writer, string requesttype)
+        public async Task CardsRequest(StreamWriter writer, string requesttype)
         {
 
-
+            HTTP_Response response = new HTTP_Response();
+            string description = $"CardResponse {requesttype}";
+            string responseHTML = "";
             if (requesttype == "GET")
             {
+                responseHTML = $"<html> <body> \n<h1> GET CardResponse Request! </h1>";
+                responseHTML += "\n</body> </html>";
 
             }
             else if (requesttype == "POST")
             {
-
-            }
-            else if (requesttype == "PUT")
-            {
-
+                responseHTML = $"<html> <body> \n<h1> POST CardResponse Request! </h1>";
+                responseHTML += "\n</body> </html>";
             }
             else if (requesttype == "DEL")
             {
-
+                responseHTML = $"<html> <body> \n<h1> DEL CardResponse Request! </h1>";
+                responseHTML += "\n</body> </html>";
             }
 
-
-            response.UniqueResponse(writer, 200, "CardResponse", "<html> <body> <h1> CardResponse Request! </h1> </body> </html>");
-            return writer;
+            response.UniqueResponse(writer, 200, description, responseHTML);
         }
 
 
 
-        public StreamWriter DeckRequest(StreamWriter writer, string requesttype)
+        public async Task DeckRequest(StreamWriter writer, string requesttype)
         {
 
-
-            response.UniqueResponse(writer, 200, "CardResponse", "<html> <body> <h1> CardResponse Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"CardResponse {requesttype}", $"<html> <body> <h1> {requesttype} CardResponse Request! </h1> </body> </html>");
         }
 
-        public StreamWriter DeckPlainRequest(StreamWriter writer, string requesttype)
+        public async Task DeckPlainRequest(StreamWriter writer, string requesttype)
         {
-
-            response.UniqueResponse(writer, 200, "DeckPlainRequest", "<html> <body> <h1> DeckPlainRequest Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"DeckPlainRequest {requesttype}", $"<html> <body> <h1> {requesttype} DeckPlainRequest Request! </h1> </body> </html>");
         }
     }
 }

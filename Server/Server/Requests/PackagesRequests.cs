@@ -10,29 +10,32 @@ namespace Server.Server.Requests
     internal class PackagesRequests
     {
 
-        HTTP_Response response = new HTTP_Response();
 
-        public StreamWriter PackageResponse(StreamWriter writer)
+        public async Task PackageResponse(StreamWriter writer, string Http_type)
         {
-            
-            response.UniqueResponse(writer, 200, "PackageResponse", "<html> <body> <h1> PackageResponse Request! </h1> </body> </html>");
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"PackageResponse {Http_type}", $"<html> <body> <h1> {Http_type} PackageResponse Request! </h1> </body> </html>");
 
-            return writer;
         }
 
-        public StreamWriter PackagesRequest(StreamWriter writer)
+        public async Task PackagesRequest(StreamWriter writer, string Http_type)
         {
-
-            response.UniqueResponse(writer, 200, "Packages", "<html> <body> <h1> Packages Request! </h1> </body> </html>");
-            return writer;
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"Packages {Http_type}", $"<html> <body> <h1> {Http_type} Packages Request! </h1> </body> </html>");
         }
 
-        public StreamWriter TransactionsPackagesRequest(StreamWriter writer)
+        public async Task TransactionsPackagesRequest(StreamWriter writer, string Http_type)
         {
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $"TransactionsPackagesRequest {Http_type}", $"<html> <body> <h1> {Http_type} TransactionsPackagesRequest Request! </h1> </body> </html>");
 
-            response.UniqueResponse(writer, 200, "TransactionsPackagesRequest", "<html> <body> <h1> TransactionsPackagesRequest Request! </h1> </body> </html>");
+        }
 
-            return writer;
+        public async Task SpecificTransactionsPackagesRequest(StreamWriter writer, string Http_type)
+        {
+            HTTP_Response response = new HTTP_Response();
+            response.UniqueResponse(writer, 200, $" Specific TransactionsPackagesRequest {Http_type}", $"<html> <body> <h1> {Http_type} Specific TransactionsPackagesRequest Request! </h1> </body> </html>");
+
         }
 
     }

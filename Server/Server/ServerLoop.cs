@@ -26,28 +26,37 @@ namespace Knie_CardProject2023.Server
                 {
                 //hier dann thread
                 var clientSocket = httpServer.AcceptTcpClient(); //blokierende function, bis client kommt, wird ein client erzeugt
-                listofThreads.Add(new(() => RequestHandler.Serverthread(clientSocket)));
+                listofThreads.Add(new(() =>  RequestHandler.Serverthread(clientSocket)));
                 listofThreads[listofThreads.Count - 1]?.Start();
 
                     
-
-                    
-                    
-
                     // /user/12
                     // /group/1/users
                     // /group/users?sortby=name
                     // /group/users?sortby=name&active=1
                 }
-                //TODO-------------------------------------------------------
-                //Request eigene klasse, Methode, endpunkt das alles
-                // field for content
-                // class for repsonse, dictonary
+            //TODO-------------------------------------------------------
+            //Request eigene klasse, Methode, endpunkt das alles
+            // field for content
+            // class for repsonse, dictonary
 
-                //writer.Flush();
-                //writer.Close();
+            //writer.Flush();
+            //writer.Close();
 
+
+            //join all before closing
+            JoinAllThreads(listofThreads);
+        }
+
+
+
+        static void JoinAllThreads(List<Thread> listofThreads)
+        {
+            for (int i = 0; i < listofThreads.Count; i++)
+            {
+                listofThreads[i]?.Join();
             }
+        }
         
 
 
