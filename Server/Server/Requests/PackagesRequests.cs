@@ -24,7 +24,7 @@ namespace Server.Server.Requests
             response.UniqueResponse(writer, 200, $"Packages {Http_type}", $"<html> <body> <h1> {Http_type} Packages Request! </h1> </body> </html>");
         }
 
-        public async Task TransactionsPackagesRequest(StreamWriter writer, string Http_type)
+        public async Task TransactionsPackagesRequest(StreamWriter writer, string Http_type, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
             response.UniqueResponse(writer, 200, $"TransactionsPackagesRequest {Http_type}", $"<html> <body> <h1> {Http_type} TransactionsPackagesRequest Request! </h1> </body> </html>");

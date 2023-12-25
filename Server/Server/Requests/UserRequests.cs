@@ -73,9 +73,7 @@ namespace Server.Server.UserRequests
 
             if (requesttype == "GET")
             {
-                // check if token is active 
-                // if no active then login
-                // if active then deny
+              //change data of user
             }
             else if (requesttype == "POST")
             {

@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection.PortableExecutable;
+using Server.Server.Requests;
 
 namespace Knie_CardProject2023.Server
 {
@@ -21,6 +22,9 @@ namespace Knie_CardProject2023.Server
                 httpServer.Start();
 
                 List<Thread> listofThreads= new List<Thread>();
+
+                GeneralRequests resetTokens = new GeneralRequests();
+                resetTokens.DeleteTokens();
 
                 while (true)
                 {

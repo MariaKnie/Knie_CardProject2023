@@ -78,12 +78,12 @@ namespace Knie_CardProject2023.Server
             headers.Add("/deck", () => cards.DeckRequest(writer, Http_type));
             headers.Add("/deck?format=plain", () => cards.DeckPlainRequest(writer, Http_type));
 
-            headers.Add("/sessions", () => general.SessionRequest(writer, Http_type));
+            headers.Add("/sessions", () => general.SessionRequest(writer, Http_type, userInfo));
             headers.Add("/stats", () => general.StatsRequest(writer, Http_type));
             headers.Add("/scoreboard", () => general.ScoreboardRequest(writer, Http_type));
             headers.Add("/battles", () => general.BattleRequest(writer, Http_type));
 
-            headers.Add("/transactions", () => packages.TransactionsPackagesRequest(writer, Http_type));
+            headers.Add("/transactions", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo));
             headers.Add("/transactions/", () => packages.SpecificTransactionsPackagesRequest(writer, Http_type));
             headers.Add("/tradings", () => general.TradingsRequest(writer, Http_type));
             headers.Add("/tradings/", () => general.SpecificTradingsRequest(writer, Http_type));
