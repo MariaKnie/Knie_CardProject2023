@@ -38,10 +38,10 @@ namespace Server.Server.UserRequests
                 if (SeeIfUserIsINDB(userToEndpoint.Username) == false) // if user isnt already registered
                 {
                     responseHTML += "\n Username is AVAILABLE";
-                    responseHTML += "\n Rgistration continue!";
+                    responseHTML += "\n Rgistration continue.";
 
                     AddUsertoDb(userToEndpoint);
-
+                    responseHTML += "\n Rgistration Complete!";
 
                 }
                 else
@@ -68,10 +68,14 @@ namespace Server.Server.UserRequests
             responseHTML += "<html> <body> \n";
             responseHTML += $"<h1> {requesttype}  Specific User Reques </h1>";
             responseHTML += $"\n Username: {name}";
+            responseHTML += "\n Token: " + userInfo?["token"];
+            responseHTML += "\n FullBody: " + userInfo?["subpath"];
 
             if (requesttype == "GET")
             {
-
+                // check if token is active 
+                // if no active then login
+                // if active then deny
             }
             else if (requesttype == "POST")
             {
@@ -82,7 +86,6 @@ namespace Server.Server.UserRequests
 
             }
 
-            responseHTML += "\n FullBody: " + userInfo?["subpath"];
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
 

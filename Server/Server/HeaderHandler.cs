@@ -14,6 +14,7 @@ namespace Server.Server
         public static string ReadHeader(ref int contentLength, ref StreamWriter writer, ref StreamReader reader, ref string? line)
         {
             bool isBody = false;
+            string bearer = "";
 
             while ((line = reader.ReadLine()) != null)
             {
@@ -32,10 +33,15 @@ namespace Server.Server
                     {
                         contentLength = int.Parse(parts[1].Trim());
                     }
+                    if (parts.Length == 2 && parts[0] == "Authorization")
+                    {
+                        var partsToken = parts[1].TrimStart().Split(' ');
+                        bearer = partsToken[1];
+                    }
                 }
             }
 
-            return "";
+            return bearer;
         }
     }
 }

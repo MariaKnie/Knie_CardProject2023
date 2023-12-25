@@ -59,6 +59,7 @@ namespace Knie_CardProject2023.Server
             GeneralRequests general = new GeneralRequests();
 
             Dictionary<string, string> userInfo = new Dictionary<string, string>();
+            userInfo.Add("token", token);
             userInfo.Add("body", body);
             if (requestSubPath.Length >2)
             {
