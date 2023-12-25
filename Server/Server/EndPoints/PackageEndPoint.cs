@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Knie_CardProject2023;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace Server.Server.EndPoints
 {
     internal class PackageEndPoint
     {
+        public List<Card> package = new List<Card>();
     }
 }

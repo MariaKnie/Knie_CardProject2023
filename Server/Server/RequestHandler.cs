@@ -84,6 +84,7 @@ namespace Knie_CardProject2023.Server
             headers.Add("/battles", () => general.BattleRequest(writer, Http_type));
 
             headers.Add("/transactions", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo));
+            headers.Add("/transactions/packages", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo)); ;
             headers.Add("/transactions/", () => packages.SpecificTransactionsPackagesRequest(writer, Http_type));
             headers.Add("/tradings", () => general.TradingsRequest(writer, Http_type));
             headers.Add("/tradings/", () => general.SpecificTradingsRequest(writer, Http_type));

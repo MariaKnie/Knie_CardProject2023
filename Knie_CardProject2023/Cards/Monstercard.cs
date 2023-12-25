@@ -21,7 +21,8 @@ namespace Knie_CardProject2023
             Random rnd = new Random();
             int num = rnd.Next(7);
 
-            Monstercard newCard = new Monstercard();   
+            Monstercard newCard = new Monstercard();
+            newCard.CardType = "Monstercard";
             if (num == 0)
             {
                 //Dragon

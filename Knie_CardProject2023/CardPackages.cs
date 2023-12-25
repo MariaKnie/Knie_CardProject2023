@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023
 {
-    internal class CardPackages
+    public class CardPackages
     {
 
         private int max_HandOutSize = 5;
@@ -40,6 +40,37 @@ namespace Knie_CardProject2023
             }
                 cardscreated = max_HandOutSize;
                 Console.WriteLine(cardscreated.ToString());
+
+        }
+
+        public List<Card> CreatePackageDB()
+        {
+            List<Card> cards = new List<Card>();    
+
+            for (int i = 0; i < 5; i++)
+            {
+                Random rnd = new Random();
+                int num = rnd.Next(2);
+
+                if (num == 1)
+                {
+                    //Monsercard
+                    Monstercard newcard = new Monstercard();
+                    newcard = newcard.GenerateCard();
+                    cards.Add(newcard);
+                }
+                else
+                {
+                    //SpellCard
+                    SpellCard newcard = new SpellCard();
+                    newcard = newcard.GenerateCard();
+                    cards.Add(newcard);
+                }
+
+                cards[cards.Count - 1].PrintCard();
+            }
+
+            return cards;
 
         }
     }

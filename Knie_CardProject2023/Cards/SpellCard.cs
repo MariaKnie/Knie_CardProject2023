@@ -22,6 +22,7 @@ namespace Knie_CardProject2023
             int num = rnd.Next(3);
 
             SpellCard newCard = new SpellCard();
+            newCard.CardType = "SpellCard";
             if (num == 0)
             {
                 //Water

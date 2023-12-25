@@ -11,7 +11,10 @@ namespace Knie_CardProject2023
     {
         protected string name;
         protected float damage;
+        protected string card_type;
         protected string element_type;
+        protected string description;
+
 
         public string Name
         {
@@ -25,12 +28,21 @@ namespace Knie_CardProject2023
             set { damage = value; }
         }
 
+        public string CardType
+        {
+            get { return card_type; }
+            set { card_type = value; }
+        }
         public string ElementType
         {
             get { return element_type; }
             set { element_type = value; }
         }
-
+        public string Description
+        {
+            get { return description; }
+            set { description = value; }
+        }
         public virtual void Attack()
         { 
         
