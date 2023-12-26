@@ -9,13 +9,18 @@ namespace Knie_CardProject2023
 {
     public abstract class Card
     {
+        protected string id;
         protected string name;
         protected float damage;
         protected string card_type;
         protected string element_type;
         protected string description;
 
-
+        public string Id
+        {
+            get { return id; }
+            set { id = value; }
+        }
         public string Name
         {
             get { return name; }

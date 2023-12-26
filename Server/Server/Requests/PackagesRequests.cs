@@ -51,15 +51,23 @@ namespace Server.Server.Requests
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
 
-                if (CheckUserAbleToBuy(user))
+                if (user != null)
                 {
-                    responseHTML += "\n Able to Buy Package";
-                    BuyPackage(user.id);
-                    responseHTML += "\n Bought Package";
+                    responseHTML += "\n Found User by token";
+                    if (CheckUserAbleToBuy(user))
+                    {
+                        responseHTML += "\n Able to Buy Package";
+                        BuyPackage(user.id);
+                        responseHTML += "\n Bought Package";
+                    }
+                    else
+                    {
+                        responseHTML += "\n UNABLE to Buy Package, too little coins";
+                    }
                 }
                 else
                 {
-                    responseHTML += "\n UNABLE to Buy Package, too little coins";
+                    responseHTML += "\n Couldnt find User by token";
                 }
             }
 
@@ -111,11 +119,11 @@ namespace Server.Server.Requests
             // Add Package to Userstack
             CardPackages packagee = new CardPackages();
             PackageEndPoint newPackage = new PackageEndPoint();
-               newPackage.package = packagee.CreatePackageDB();
+               newPackage.packageCard = packagee.CreatePackageDB();
 
             for (int i = 0; i < newPackage.package.Count; i++)
             {
-                AddCardtoCardTable(newPackage.package[i], id);  
+                AddCardtoCardTable(newPackage.packageCard[i], id);  
             }
 
         }

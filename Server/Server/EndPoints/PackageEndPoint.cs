@@ -9,6 +9,7 @@ namespace Server.Server.EndPoints
 {
     internal class PackageEndPoint
     {
-        public List<Card> package = new List<Card>();
+        public List<CardEndpoint> package = new List<CardEndpoint>();
+        public List<Card> packageCard = new List<Card>();
     }
 }
