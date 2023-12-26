@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Server.Server.Requests
 {
@@ -57,7 +58,7 @@ namespace Server.Server.Requests
                     if (CheckUserAbleToBuy(user))
                     {
                         responseHTML += "\n Able to Buy Package";
-                        BuyPackage(user.id);
+                        BuyPackage(user, ref responseHTML);
                         responseHTML += "\n Bought Package";
                     }
                     else
@@ -95,7 +96,7 @@ namespace Server.Server.Requests
         }
 
 
-        public void BuyPackage(int id)
+        public void BuyPackage(UserEndpoint user, ref string html)
         {
 
             // Connection
@@ -109,7 +110,7 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, id);
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.id);
 
 
             command.ExecuteNonQuery();
@@ -121,15 +122,31 @@ namespace Server.Server.Requests
             PackageEndPoint newPackage = new PackageEndPoint();
                newPackage.packageCard = packagee.CreatePackageDB();
 
-            for (int i = 0; i < newPackage.package.Count; i++)
+            CardRequests cr = new CardRequests();
+            int DeckCount = cr.CheckIfUserHasDeckCards(user);
+            bool todeck = false;
+
+            if (DeckCount == 0)
             {
-                AddCardtoCardTable(newPackage.packageCard[i], id);  
+                todeck = true;
+            }
+
+            Console.WriteLine("ADDING TO STACK"); 
+            for (int i = 0; i < newPackage.packageCard.Count; i++)
+            {
+                if (todeck && i == 4)
+                {
+                    todeck = false;
+                }
+                Console.WriteLine($"add card number {i}"); 
+                AddCardtoCardTable(newPackage.packageCard[i], user.id, todeck);
+                html += $"\n {newPackage.packageCard[i].PrintCard()}";
             }
 
         }
 
 
-        public void AddCardtoCardTable(Card newCard, int userid)
+        public void AddCardtoCardTable(Card newCard, int userid, bool deck)
         {
             var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
             using IDbConnection connection = new NpgsqlConnection(connString);
@@ -137,7 +154,7 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "INSERT INTO cards (id, card_name, card_type, card_element, card_damage, card_description, user_id) VALUES(@id, @card_name, @card_type, @card_element, @card_damage, @card_description, @user_id);";
+            string query = "INSERT INTO cards (id, card_name, card_type, card_element, card_damage, card_description, user_id, card_indeck) VALUES(@id, @card_name, @card_type, @card_element, @card_damage, @card_description, @user_id, @card_indeck);";
             command.CommandText = query;
 
             // parameters
@@ -153,10 +170,12 @@ namespace Server.Server.Requests
             GeneralRequests.AddParameterWithValue(command, "@card_damage", DbType.Int32, newCard.Damage);
             GeneralRequests.AddParameterWithValue(command, "@card_description", DbType.String, description);
             GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, userid);
+            GeneralRequests.AddParameterWithValue(command, "@card_indeck", DbType.Boolean, deck);
 
             newCard.PrintCard();
             command.ExecuteNonQuery();
         }
+
 
         public async Task SpecificTransactionsPackagesRequest(StreamWriter writer, string Http_type)
         {

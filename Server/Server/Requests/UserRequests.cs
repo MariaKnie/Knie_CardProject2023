@@ -99,7 +99,7 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT COUNT(*) FROM users WHERE Username = @Username";
+            string query = "SELECT COUNT(*) FROM users WHERE Username = @Username;";
             command.CommandText = query;
 
             // parameters

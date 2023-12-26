@@ -53,9 +53,11 @@ namespace Knie_CardProject2023
         
         }
 
-        public virtual void PrintCard()
+        public virtual string PrintCard()
         {
-            Console.WriteLine($"Card: \n  Name: {name}\n  Damage: {damage}\n  Element: {element_type}");
+            string stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
+            Console.WriteLine(stats);
+            return stats;
         }
 
         public virtual Card GenerateCard()

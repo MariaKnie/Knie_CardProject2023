@@ -86,7 +86,7 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT id FROM users WHERE Username = @Username AND  Password = @Password";
+            string query = "SELECT id FROM users WHERE Username = @Username AND  Password = @Password;";
             command.CommandText = query;
 
             // parameters

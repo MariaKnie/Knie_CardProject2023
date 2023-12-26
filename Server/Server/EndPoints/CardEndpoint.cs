@@ -19,7 +19,7 @@ namespace Server.Server.EndPoints
 
         public virtual string PrintCard()
         {
-            string stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}, Description: {Description}";
+            string stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
             Console.WriteLine(stats);
             return stats;
         }
