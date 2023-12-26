@@ -12,7 +12,7 @@ namespace Server.Server.Requests
 {
     internal class GeneralRequests
     {
-        static void AddParameterWithValue(IDbCommand command, string paramName, DbType dbType, object value)
+        public static void AddParameterWithValue(IDbCommand command, string paramName, DbType dbType, object value)
         {
             command.Parameters.Add(new NpgsqlParameter(paramName, dbType) { Value = value });
         }
@@ -52,6 +52,7 @@ namespace Server.Server.Requests
                         responseHTML += "\n User able to login";
                         // User isnt logged in yet
                         AddTokenForUser(id, userToEndpoint);
+                        responseHTML += "\n User logged in, Token Set";
                     }
                     else
                     {

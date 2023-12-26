@@ -15,8 +15,6 @@ namespace Server.Server.Requests
 {
     internal class PackagesRequests
     {
-
-
         public async Task PackageResponse(StreamWriter writer, string requesttype)
         {
             HTTP_Response response = new HTTP_Response();
@@ -50,13 +48,14 @@ namespace Server.Server.Requests
             if (requesttype == "POST")
             {
                 // - 5 coind + 5 cards to stack
-
-                UserEndpoint user = GetUserByToken(token);
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
 
                 if (CheckUserAbleToBuy(user))
                 {
                     responseHTML += "\n Able to Buy Package";
                     BuyPackage(user.id);
+                    responseHTML += "\n Bought Package";
                 }
                 else
                 {
@@ -69,79 +68,7 @@ namespace Server.Server.Requests
             response.UniqueResponse(writer, 200, description, responseHTML);
         }
 
-        static void AddParameterWithValue(IDbCommand command, string paramName, DbType dbType, object value)
-        {
-            command.Parameters.Add(new NpgsqlParameter(paramName, dbType) { Value = value });
-        }
-
-        public UserEndpoint GetUserByToken(string token)
-        {
-            UserEndpoint user = null;
-
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT user_id FROM tokens WHERE token = @token";
-            command.CommandText = query;
-
-            // parameters
-            AddParameterWithValue(command, "@token", DbType.String, token);
-
-            var result = command.ExecuteScalar();
-
-            if (result == null)
-            {
-                Console.WriteLine("User token doesnt exist");
-                return null;
-            }
-
-            int id = (int)result;
-            Console.WriteLine($"User id found = {id}");
-
-            // ----------------------------gets user now by id
-            // command
-             query = "SELECT * FROM users WHERE id = @id";
-            command.CommandText = query;
-
-            // parameters
-            AddParameterWithValue(command, "@id", DbType.Int32, id);
-
-            using IDataReader reader = command.ExecuteReader();
-
-            while (reader.Read())
-            {
-                user = new()
-                {
-                    id = (int)reader["id"],
-                    Username = (string)reader["username"],
-                    Password = (string)reader["password"],
-                    age = 0,
-                    description ="",
-                    coins = (int)reader["coins"]
-                
-                };
-
-                int columnIndex = reader.GetOrdinal("age");
-                if (!reader.IsDBNull(columnIndex))
-                {
-                
-                user.description = (string)reader["age"];
-                }
-                columnIndex = reader.GetOrdinal("description");
-                if (!reader.IsDBNull(columnIndex))
-                {
-                
-                user.description = (string)reader["description"];
-                }
-
-            }
-
-            return user;
-        }
+       
 
         public bool CheckUserAbleToBuy(UserEndpoint user)
         {
@@ -174,7 +101,7 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            AddParameterWithValue(command, "@id", DbType.Int32, id);
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, id);
 
 
             command.ExecuteNonQuery();
@@ -211,13 +138,13 @@ namespace Server.Server.Requests
 
             string description = "" + newCard.Description;
 
-            AddParameterWithValue(command, "@id", DbType.String, id);
-            AddParameterWithValue(command, "@card_name", DbType.String, newCard.Name);
-            AddParameterWithValue(command, "@card_type", DbType.String, newCard.CardType);
-            AddParameterWithValue(command, "@card_element", DbType.String, newCard.ElementType);
-            AddParameterWithValue(command, "@card_damage", DbType.Int32, newCard.Damage);
-            AddParameterWithValue(command, "@card_description", DbType.String, description);
-            AddParameterWithValue(command, "@user_id", DbType.Int32, userid);
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, id);
+            GeneralRequests.AddParameterWithValue(command, "@card_name", DbType.String, newCard.Name);
+            GeneralRequests.AddParameterWithValue(command, "@card_type", DbType.String, newCard.CardType);
+            GeneralRequests.AddParameterWithValue(command, "@card_element", DbType.String, newCard.ElementType);
+            GeneralRequests.AddParameterWithValue(command, "@card_damage", DbType.Int32, newCard.Damage);
+            GeneralRequests.AddParameterWithValue(command, "@card_description", DbType.String, description);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, userid);
 
             newCard.PrintCard();
             command.ExecuteNonQuery();

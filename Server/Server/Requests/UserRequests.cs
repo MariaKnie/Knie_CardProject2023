@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Data;
 using Npgsql;
+using Server.Server.Requests;
 
-namespace Server.Server.UserRequests
+namespace Server.Server.Requests
 {
     internal class UserRequests
     {
@@ -89,12 +90,6 @@ namespace Server.Server.UserRequests
 
         }
 
-
-
-        static void AddParameterWithValue(IDbCommand command, string paramName, DbType dbType, object value)
-        {
-            command.Parameters.Add(new NpgsqlParameter(paramName, dbType) { Value = value });
-        }
         public bool SeeIfUserIsINDB(string username)
         {
             // Connection
@@ -109,7 +104,7 @@ namespace Server.Server.UserRequests
 
             // parameters
             //command.Parameters.AddWithValue("@Username", username);
-            AddParameterWithValue(command, "@Username", DbType.String, username);
+            GeneralRequests.AddParameterWithValue(command, "@Username", DbType.String, username);
 
 
             var count = command.ExecuteScalar();
@@ -152,13 +147,84 @@ namespace Server.Server.UserRequests
             //string id = factory.generateID();
             //Console.WriteLine($"username = {user.Username}, password = {user.Password} ");
             //AddParameterWithValue(command, "@id", DbType.String, id);
-            AddParameterWithValue(command, "@username", DbType.String, user.Username);
-            AddParameterWithValue(command, "@password", DbType.String, user.Password);
+            GeneralRequests.AddParameterWithValue(command, "@username", DbType.String, user.Username);
+            GeneralRequests.AddParameterWithValue(command, "@password", DbType.String, user.Password);
 
 
 
 
             command.ExecuteNonQuery();
+        }
+
+
+
+        public UserEndpoint GetUserByToken(string token)
+        {
+            UserEndpoint user = null;
+
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT user_id FROM tokens WHERE token = @token";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@token", DbType.String, token);
+
+            var result = command.ExecuteScalar();
+
+            if (result == null)
+            {
+                Console.WriteLine("User token doesnt exist");
+                return null;
+            }
+
+            int id = (int)result;
+            Console.WriteLine($"User id found = {id}");
+
+            // ----------------------------gets user now by id
+            // command
+            query = "SELECT * FROM users WHERE id = @id";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, id);
+
+            using IDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                user = new()
+                {
+                    id = (int)reader["id"],
+                    Username = (string)reader["username"],
+                    Password = (string)reader["password"],
+                    age = 0,
+                    description = "",
+                    coins = (int)reader["coins"]
+
+                };
+
+                int columnIndex = reader.GetOrdinal("age");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    user.description = (string)reader["age"];
+                }
+                columnIndex = reader.GetOrdinal("description");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    user.description = (string)reader["description"];
+                }
+
+            }
+
+            return user;
         }
     }
     

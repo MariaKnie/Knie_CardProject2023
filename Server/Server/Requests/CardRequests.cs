@@ -1,4 +1,6 @@
 ﻿using Knie_CardProject2023.Server;
+using Server.Server.Requests;
+using Server.Server.UserRequests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,29 +11,43 @@ namespace Server.Server
 {
     internal class CardRequests
     {
-        public async Task CardsRequest(StreamWriter writer, string requesttype)
+        public async Task CardsRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
 
             HTTP_Response response = new HTTP_Response();
-            string description = $"CardResponse {requesttype}";
+            string description = $"Show All User Cards {requesttype}";
             string responseHTML = "";
-            if (requesttype == "GET")
-            {
-                responseHTML = $"<html> <body> \n<h1> GET CardResponse Request! </h1>";
-                responseHTML += "\n</body> </html>";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
 
-            }
-            else if (requesttype == "POST")
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype}Show All User Cards </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "POST")
             {
-                responseHTML = $"<html> <body> \n<h1> POST CardResponse Request! </h1>";
-                responseHTML += "\n</body> </html>";
-            }
-            else if (requesttype == "DEL")
-            {
-                responseHTML = $"<html> <body> \n<h1> DEL CardResponse Request! </h1>";
-                responseHTML += "\n</body> </html>";
+                // - 5 coind + 5 cards to stack
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                if (true)
+                {
+                    responseHTML += "\n Able to Show cards";                
+                    responseHTML += "\n Showed Cards";
+                }
+                else
+                {
+                    responseHTML += "\n UNABLE to Show cards";
+                }
             }
 
+
+            responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
         }
 
