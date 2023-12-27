@@ -85,7 +85,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
 
             var result = command.ExecuteScalar();
 
@@ -117,7 +117,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
 
             var result = command.ExecuteScalar();
 
@@ -146,7 +146,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
 
             using IDataReader reader = command.ExecuteReader();
             int count = 0;
@@ -169,7 +169,7 @@ namespace Server.Server
                 if (!reader.IsDBNull(columnIndex))
                 {
 
-                    user.description = (string)reader["card_description"];
+                    user.Bio = (string)reader["card_description"];
                 }
 
                 Console.WriteLine($"CardNumber {count}");
@@ -198,7 +198,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
 
             using IDataReader reader = command.ExecuteReader();
             int count = 0;
@@ -221,7 +221,7 @@ namespace Server.Server
                 if (!reader.IsDBNull(columnIndex))
                 {
 
-                    user.description = (string)reader["card_description"];
+                    user.Bio = (string)reader["card_description"];
                 }
 
                 Console.WriteLine($"CardNumber {count}");
@@ -293,7 +293,7 @@ namespace Server.Server
                 string temp = fullinfo.ToString();
                 temp = temp.Substring(1);
                 temp = temp.Remove(temp.Length - 1);
-                Console.WriteLine("Snipping starting!");
+                Console.WriteLine("Card Snipping starting!");
                 Console.WriteLine(temp);
                 try
                 {
@@ -365,7 +365,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
 
             using IDataReader reader = command.ExecuteReader();
             while (reader.Read())
@@ -493,7 +493,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
 
             using IDataReader reader = command.ExecuteReader();
             int count = 0;
@@ -516,7 +516,7 @@ namespace Server.Server
                 if (!reader.IsDBNull(columnIndex))
                 {
 
-                    user.description = (string)reader["card_description"];
+                    user.Bio = (string)reader["card_description"];
                 }
 
                 Console.WriteLine($"CardNumber {count}");

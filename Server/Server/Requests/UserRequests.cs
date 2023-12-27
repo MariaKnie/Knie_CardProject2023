@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Data;
 using Npgsql;
 using Server.Server.Requests;
+using Microsoft.VisualBasic;
 
 namespace Server.Server.Requests
 {
@@ -65,37 +66,122 @@ namespace Server.Server.Requests
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
-
+            string subpath_user = userInfo?["subpath"];
             Console.WriteLine(fullinfo);
 
             responseHTML += "<html> <body> \n";
             responseHTML += $"<h1> {requesttype} Specific User </h1>";
             responseHTML += "\n Token: " + token;
             responseHTML += "\n FullBody: " + userInfo?["body"];
+            responseHTML += "\n Subpath: " + subpath_user;
 
             UserEndpoint user = GetUserByToken(token);
 
-            if (requesttype == "GET")
+            if (user != null && user.Username == subpath_user)
             {
-                if (fullinfo.Length>0) // change user data
-                {
-                    responseHTML += "\n Change User Data";
-                }
-                else // get user data
-                {
-                    responseHTML += "\n Get User Data \n\n";
-                    responseHTML += "\n { \"User\": {";
 
-                    responseHTML += JsonSerializer.Serialize<UserEndpoint>(user);
-                    responseHTML += "\n } \n}";
+                if (requesttype == "GET")
+                {
+                    if (fullinfo.Length > 0) // change user data
+                    {
+                        responseHTML += "\n Change User Data";
+
+                        Dictionary<string, string> InfoToChange_Dic = new Dictionary<string, string>();
+                        string temp = fullinfo.ToString();
+                        temp = temp.Substring(1);
+                        temp = temp.Remove(temp.Length - 1);
+                        Console.WriteLine("User Data Snipping starting!");
+                        Console.WriteLine(temp);
+                        try
+                        {
+                            string[] parts1 = temp.Split(",");
+                            for (int i = 0; i < parts1.Count(); i++)
+                            {
+                                string key = "";
+                                string value = "";
+                                string[] parts2 = parts1[i].Split(":", 2);
+                                parts2[0] = parts2[0].ToLower();
+                                for (int b = 0; b < parts2.Count(); b++)
+                                {
+                                    parts2[b] = parts2[b].Trim();
+                                    parts2[b] = parts2[b].Remove(parts2[b].Length - 1);
+                                    parts2[b] = parts2[b].Substring(1);
+                                    if (b == 0)
+                                    {
+                                        key = parts2[b];
+                                    }
+                                    else if (b == 1)
+                                    {
+                                        value = parts2[b];
+                                    }
+                                }
+                                InfoToChange_Dic.Add(key, value);
+                                Console.WriteLine($" \nUser Snip {i} : \nKey: " + InfoToChange_Dic.ElementAt(InfoToChange_Dic.Count - 1).Key + "\nValue: " + InfoToChange_Dic.ElementAt(InfoToChange_Dic.Count-1).Value);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error in Snipping User Data " + e.Message);
+                            responseHTML += "\n Error in Snipping User Data";
+                            responseHTML += "\n</body> </html>";
+                            response.UniqueResponse(writer, 400, description, responseHTML);
+                            return;
+                        }
+
+
+                        ChangeUserData(user, InfoToChange_Dic);
+
+                    }
+                    else // get user data
+                    {
+                        responseHTML += "\n Get User Data \n\n";
+                        responseHTML += "\n { \"User\": {";
+
+                        responseHTML += JsonSerializer.Serialize<UserEndpoint>(user);
+                        responseHTML += "\n } \n}";
+                    }
                 }
+
+
             }
-
-
+            else
+            {
+                responseHTML += "\n Couldnt find User by token";
+            }
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
 
-        }    
+        }
+
+
+        public void ChangeUserData(UserEndpoint user, Dictionary<string, string> newUserdata)
+        {
+
+            for (int i = 0; i < newUserdata.Count; i++)
+            {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            Console.WriteLine("IN CHANGE\n");
+                using IDbCommand command = connection.CreateCommand();
+                string col = newUserdata.ElementAt(i).Key;
+                string query = "UPDATE users SET " + col + " = @value WHERE id = @id;";
+
+                Console.WriteLine(newUserdata.ElementAt(i).Key + " - " + newUserdata.ElementAt(i).Value);
+
+                command.CommandText = query;
+
+                // parameters
+                GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.Id);
+                GeneralRequests.AddParameterWithValue(command, "@value", DbType.String, newUserdata.ElementAt(i).Value);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
         public bool SeeIfUserIsINDB(string username)
         {
             // Connection
@@ -206,12 +292,15 @@ namespace Server.Server.Requests
             {
                 user = new()
                 {
-                    id = (int)reader["id"],
+                    Id = (int)reader["id"],
                     Username = (string)reader["username"],
                     Password = (string)reader["password"],
-                    age = 0,
-                    description = "",
-                    coins = (int)reader["coins"]
+                    Age = 0,
+                    Bio = "",
+                    Image = "",
+                    Coins = (int)reader["coins"],
+                    Wins = (int)reader["wins"],
+                    Loses = (int)reader["loses"]
 
                 };
 
@@ -219,19 +308,77 @@ namespace Server.Server.Requests
                 if (!reader.IsDBNull(columnIndex))
                 {
 
-                    user.description = (string)reader["age"];
+                    user.Age = (int)reader["age"];
                 }
-                columnIndex = reader.GetOrdinal("description");
+                columnIndex = reader.GetOrdinal("bio");
                 if (!reader.IsDBNull(columnIndex))
                 {
 
-                    user.description = (string)reader["description"];
+                    user.Bio = (string)reader["bio"];
+                }
+                columnIndex = reader.GetOrdinal("image");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    user.Image = (string)reader["image"];
                 }
 
             }
 
             return user;
         }
+
+
+        public async Task StatsRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"Stats Request {requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
+
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} Stats Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "GET")
+            {
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                if (user != null)
+                {
+                    int matches = user.Wins + user.Loses;
+                    float win_perc = 0;
+                    float lose_perc = 0;
+                    if (matches > 0)
+                    {
+                        win_perc = ((float)user.Wins / (float)matches) * 100;
+                        lose_perc = ((float)user.Loses / (float)matches) * 100;
+                    }
+
+                    responseHTML += $"\nWins: {user.Wins}";
+                    responseHTML += $"\nLoses: {user.Loses}";
+
+                    responseHTML += $"\nWinChance: {win_perc }%";
+                    responseHTML += $"\nLoseChance: {lose_perc}%";
+                    responseHTML += $"\nMatches Played: {matches}";
+                }
+                else
+                {
+                    responseHTML += "\n Couldnt find User by token";
+                }
+            }
+
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, 200, description, responseHTML);
+        }
+
     }
-    
 }

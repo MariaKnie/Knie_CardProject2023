@@ -8,12 +8,15 @@ namespace Server.Server
 {
     internal class UserEndpoint
     {
-        public int id { get; set; }
+        public int Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }    
-        public int age { get; set; }
-        public string description { get; set; }
-        public int coins { get; set; }
+        public int Age { get; set; }
+        public string Bio { get; set; }
+        public string Image { get; set; }
+        public int Coins { get; set; }
+        public int Wins { get; set; }
+        public int Loses { get; set; }
 
     }
 }

@@ -78,8 +78,8 @@ namespace Knie_CardProject2023.Server
             headers.Add("/deck?format=plain", () => cards.DeckPlainRequest(writer, Http_type, userInfo));
 
             headers.Add("/sessions", () => general.SessionRequest(writer, Http_type, userInfo));
-            headers.Add("/stats", () => general.StatsRequest(writer, Http_type));
-            headers.Add("/scoreboard", () => general.ScoreboardRequest(writer, Http_type));
+            headers.Add("/stats", () => users.StatsRequest(writer, Http_type, userInfo));
+            headers.Add("/scoreboard", () => general.ScoreboardRequest(writer, Http_type, userInfo));
             headers.Add("/battles", () => general.BattleRequest(writer, Http_type));
 
             headers.Add("/transactions", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo));
@@ -97,7 +97,7 @@ namespace Knie_CardProject2023.Server
             else if (headers.ContainsKey("/"+ requestSubPath[1] + "/")) //specific User muss noch name übergeben
             {
                 //specfic user
-                ForConsole += "\nFUNCTION: " + "/" +  requestSubPath[1] + "/";
+                ForConsole += "\nFUNCTION: " + "/" +  requestSubPath[1] + "/ "+requestSubPath[2];
                 await headers["/" + requestSubPath[1] + "/"]();
             }
             else

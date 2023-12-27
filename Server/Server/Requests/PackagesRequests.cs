@@ -86,7 +86,7 @@ namespace Server.Server.Requests
                 return false;
             }
 
-            if (user.coins < 5)
+            if (user.Coins < 5)
             {
                 return false;
             }
@@ -110,7 +110,7 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.id);
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.Id);
 
 
             command.ExecuteNonQuery();
@@ -139,7 +139,7 @@ namespace Server.Server.Requests
                     todeck = false;
                 }
                 Console.WriteLine($"add card number {i}"); 
-                AddCardtoCardTable(newPackage.packageCard[i], user.id, todeck);
+                AddCardtoCardTable(newPackage.packageCard[i], user.Id, todeck);
                 html += $"\n {newPackage.packageCard[i].PrintCard()}";
             }
 
