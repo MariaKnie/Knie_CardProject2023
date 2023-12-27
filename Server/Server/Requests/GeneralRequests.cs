@@ -1,6 +1,7 @@
 ﻿using Knie_CardProject2023;
 using Knie_CardProject2023.Logic;
 using Knie_CardProject2023.Server;
+using Microsoft.VisualBasic;
 using Npgsql;
 using Server.Server.EndPoints;
 using System;
@@ -247,6 +248,8 @@ namespace Server.Server.Requests
 
 
         public static List<List<User>> playerlist = new List<List<User>>();
+        public static List<List<string>> deckcard_ids = new List<List<string>>();
+
         public async Task BattleRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -274,9 +277,14 @@ namespace Server.Server.Requests
                 {
                     responseHTML += "\n Looking for Game";
                     bool foundSpot = false;
+                    bool battle = false;
 
                     List<Card> PlayerDeck = new List<Card>();
                     ur.GetPlayerDeckCards(ref Carduser);
+
+                    int posinPlayList = 0;
+
+
                     // Game.GameLoop(usersList, 0);
 
                     if (playerlist.Count < 1) // first player
@@ -297,25 +305,55 @@ namespace Server.Server.Requests
                                 responseHTML += "\n Found Spot!";
 
                                 playerlist[i].Add(Carduser);
-                                if (playerlist[i].Count() == 2)
+                                posinPlayList = i;
+                                if (playerlist[i].Count() == 2)  // can play
                                 {
-                                    responseHTML += "\n Battle Begin!";
-                                    Game.GameLoop(playerlist[i], 0);
+                                    battle = true;
                                 }
-                                else
-                                {
-                                    responseHTML += "\n Waiting for Player";
-                                }
-                                break;
+                            }
+                            else
+                            {
+                                responseHTML += "\n Waiting for Player";
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!foundSpot)
+                    {
+                        playerlist.Add(new List<User>());
+                        playerlist[playerlist.Count - 1].Add(Carduser);
+                        responseHTML += "\n Waiting for Player";
+                    }
+
+                    if (battle) // start battle
+                    {
+                        List<User> playersOfRound = playerlist[posinPlayList];
+
+                        for (int p = 0; p < playersOfRound.Count; p++)
+                        {
+                            deckcard_ids.Add(new List<string>());// for every player a list of ids
+                            for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
+                            {
+                                deckcard_ids[deckcard_ids.Count - 1].Add(playersOfRound[p].Deck.Cards[c].Id);
                             }
                         }
 
-                        if (!foundSpot)
+                        responseHTML += "\n Battle Begin!";
+
+                        Game.GameLoop(playersOfRound, 0); // Actual Battle
+
+                        for (int p = 0; p < playersOfRound.Count; p++) // take over cards
                         {
-                            playerlist.Add(new List<User>());
-                            playerlist[playerlist.Count - 1].Add(Carduser);
-                            responseHTML += "\n Waiting for Player";
+                            for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
+                            {
+                                if (!deckcard_ids[p].Contains(playersOfRound[p].Deck.Cards[c].Id))
+                                {
+                                    ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
+                                }
+                            }
                         }
+
                     }
 
 
@@ -330,6 +368,28 @@ namespace Server.Server.Requests
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
         }
+
+
+        public void ChangeCardToPlayer(string card_id, int user_id)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "UPDATE cards SET user_id = @user_id WHERE id = @card_id;";
+
+            command.CommandText = query;
+
+            // parameters
+            AddParameterWithValue(command, "@user_id", DbType.Int32, user_id);
+            AddParameterWithValue(command, "@card_id", DbType.String, card_id);
+
+            command.ExecuteNonQuery();
+        }
+
 
         public async Task TradingsRequest(StreamWriter writer, string requesttype)
         {
