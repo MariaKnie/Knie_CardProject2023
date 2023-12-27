@@ -113,24 +113,32 @@ namespace Knie_CardProject2023.Logic
         }
 
 
-        public static void GameLoop(List<User> usersList, int rounds)
+        public static int GameLoop(List<User> usersList, int rounds)
         {
 
             Console.WriteLine($"\nGame Start!");
             Console.WriteLine($"First Round: {rounds}");
 
+            int winner = -2;
+
             while (true)//Game Loop
             {
-                Game.CompareCards(usersList, rounds);
+                winner = Game.CompareCards(usersList, rounds);
 
                 if (Game.GameOver(usersList) == 0 || rounds == 100)
                 {
+                    if (rounds == 100)
+                    {
+                        winner = -1;
+                    }
                     break;
                 }
 
                 rounds++;
                 Console.WriteLine($"\n\nNext Round: {rounds}");
             }
+
+            return winner;
         }
     }
 }

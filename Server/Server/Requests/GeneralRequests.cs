@@ -249,7 +249,7 @@ namespace Server.Server.Requests
 
         public static List<List<User>> playerlist = new List<List<User>>();
         public static List<List<string>> deckcard_ids = new List<List<string>>();
-
+        public static List<Dictionary<string, string>> GameLog = new List<Dictionary<string, string>>();   
         public async Task BattleRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -264,6 +264,8 @@ namespace Server.Server.Requests
             responseHTML += $"<h1> {requesttype} Battle Request </h1>";
             responseHTML += "\n FullBody: " + fullinfo;
             responseHTML += "\n Token: " + token;
+            bool battle = false;
+            int posinPlayList = 0;
 
 
 
@@ -277,21 +279,25 @@ namespace Server.Server.Requests
                 {
                     responseHTML += "\n Looking for Game";
                     bool foundSpot = false;
-                    bool battle = false;
 
                     List<Card> PlayerDeck = new List<Card>();
                     ur.GetPlayerDeckCards(ref Carduser);
 
-                    int posinPlayList = 0;
 
-
+                   
                     // Game.GameLoop(usersList, 0);
 
                     if (playerlist.Count < 1) // first player
                     {
                         playerlist.Add(new List<User>());
+                        GameLog.Add(new Dictionary<string, string>());
                         playerlist[0].Add(Carduser);
                         responseHTML += "\n First Playeer, Waiting for Players";
+                        posinPlayList = 0;
+                        GameLog[posinPlayList].Add("Battle", "null");
+                        foundSpot = true;
+
+                        Console.WriteLine("First Player");
                     }
                     else
                     {
@@ -303,17 +309,19 @@ namespace Server.Server.Requests
                             {
                                 foundSpot = true;
                                 responseHTML += "\n Found Spot!";
-
+                                Console.WriteLine("Found Spot!");
                                 playerlist[i].Add(Carduser);
                                 posinPlayList = i;
+
+                                if (playerlist[i].Count() == 1)
+                                {
+                                    responseHTML += "\n Waiting for Player";
+                                    GameLog[posinPlayList].Add("Battle", "null");
+                                }
                                 if (playerlist[i].Count() == 2)  // can play
                                 {
                                     battle = true;
                                 }
-                            }
-                            else
-                            {
-                                responseHTML += "\n Waiting for Player";
                             }
                             break;
                         }
@@ -322,9 +330,14 @@ namespace Server.Server.Requests
                     if (!foundSpot)
                     {
                         playerlist.Add(new List<User>());
-                        playerlist[playerlist.Count - 1].Add(Carduser);
+                        GameLog.Add(new Dictionary<string, string>());
+                        posinPlayList = playerlist.Count - 1;
+                        playerlist[posinPlayList].Add(Carduser);
                         responseHTML += "\n Waiting for Player";
+                        GameLog[posinPlayList].Add("Battle", "null");
                     }
+
+
 
                     if (battle) // start battle
                     {
@@ -340,23 +353,44 @@ namespace Server.Server.Requests
                         }
 
                         responseHTML += "\n Battle Begin!";
-
-                        Game.GameLoop(playersOfRound, 0); // Actual Battle
-
-                        for (int p = 0; p < playersOfRound.Count; p++) // take over cards
+                        int status = Game.GameLoop(playersOfRound, 0); // Actual Battle
+                        if (status < 0)
                         {
-                            for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
+                            if (status == -1)
                             {
-                                if (!deckcard_ids[p].Contains(playersOfRound[p].Deck.Cards[c].Id))
-                                {
-                                    ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
-                                }
+                                //responseHTML += "\nDraw!";
+                                GameLog[posinPlayList].Add("Log", $"\nDraw!");
                             }
                         }
+                        else
+                        {
+                            Console.WriteLine($"STATUS {status}!");
+                            Console.WriteLine($"Player {playersOfRound[status].Username} Won!");
+                           // responseHTML += $"\nPlayer {playersOfRound[status].Username} Won!";
+                            GameLog[posinPlayList].Add("Log", $"\nPlayer {playersOfRound[status].Username} Won!");
+                            for (int p = 0; p < playersOfRound.Count; p++) // take over cards
+                            {
+                                for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
+                                {
+                                    if (!deckcard_ids[p].Contains(playersOfRound[p].Deck.Cards[c].Id))
+                                    {
+                                        ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
+                                    }
+                                }
+                            }
 
+                        }
+
+
+                       
+                        GameLog[posinPlayList]["Battle"] =  "done";
                     }
 
-
+                    while (GameLog[posinPlayList]["Battle"] != "done") //waiting for second player
+                    {
+                        //Console.WriteLine("\n Waiting for Player");
+                    }
+                    responseHTML += GameLog[posinPlayList]["Log"];
                 }
                 else
                 {
@@ -364,9 +398,22 @@ namespace Server.Server.Requests
                 }
             }
 
-
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
+
+            if (GameLog[posinPlayList].ContainsKey("Ended"))
+            {
+                GameLog[posinPlayList]["Ended"] =  "2";
+                playerlist[posinPlayList].Clear();
+                GameLog[posinPlayList].Clear();
+                deckcard_ids[posinPlayList].Clear();
+            }
+            else
+            {
+                GameLog[posinPlayList].Add("Ended", "1");
+            }
+           
+
         }
 
 
