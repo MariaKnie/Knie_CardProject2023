@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023
 {
-    internal class SpellCard : Card
+    public class SpellCard : Card
     {
 
 

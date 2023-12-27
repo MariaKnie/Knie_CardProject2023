@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023.Logic
 {
-    internal class Game
+    public class Game
     {
 
 
@@ -34,7 +34,7 @@ namespace Knie_CardProject2023.Logic
 
 
 
-        public static void CompareCards(List<User> usersList, int rounds)
+        public static int CompareCards(List<User> usersList, int rounds)
         {
             Random rnd = new Random();
             int num = rnd.Next(usersList[0].Deck.Cards.Count);
@@ -45,6 +45,7 @@ namespace Knie_CardProject2023.Logic
             int won;
             int lost;
             int toRemove;
+            bool draw = false;
             Console.WriteLine("****************************************************");
             Console.WriteLine($"User {usersList[0].Username}: Card [{num}]: ");
             usersList[0].Deck.Cards[num].PrintCard();
@@ -59,23 +60,39 @@ namespace Knie_CardProject2023.Logic
                 lost = 1;
                 toRemove = num2;
             }
-            else
+            else if (usersList[0].Deck.Cards[num].Damage < usersList[1].Deck.Cards[num2].Damage)
             {
+                
                 won = 1;
                 lost = 0;
                 toRemove = num;
             }
+            else // Draw
+            {
+                won = -1;
+                lost = -1;
+                toRemove = -1;
+                draw = true;
+            }
 
+            if (draw)
+            {
+                Console.WriteLine($"DRAW!: Cards have the same Damage,  round {rounds} !! \n       Deck-Cards stay the same!");
 
-            Console.WriteLine($"User {usersList[won].Username}: Won round {rounds} !! \n       Deck-Cards [{usersList[won].Deck.Cards.Count}] +1");
-            Console.WriteLine($"User {usersList[lost].Username}: Lost.  \n       Deck-Cards [{usersList[lost].Deck.Cards.Count}] -1");
+            }
+            else
+            {
+                Console.WriteLine($"User {usersList[won].Username}: Won round {rounds} !! \n       Deck-Cards [{usersList[won].Deck.Cards.Count}] +1");
+                Console.WriteLine($"User {usersList[lost].Username}: Lost.  \n       Deck-Cards [{usersList[lost].Deck.Cards.Count}] -1");
+                Card temp = usersList[lost].Deck.Cards[toRemove];
+                usersList[lost].Deck.Cards.RemoveAt(toRemove);
 
+                usersList[won].Deck.Cards.Add(temp);
+                usersList[won].Wins++;
+                usersList[lost].Loses++;
+            }
 
-
-            Card temp = usersList[lost].Deck.Cards[toRemove];
-            usersList[lost].Deck.Cards.RemoveAt(toRemove);
-
-            usersList[won].Deck.Cards.Add(temp);
+            return won;
 
         }
 

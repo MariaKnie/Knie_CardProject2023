@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023
 {
-    internal class Monstercard : Card
+    public class Monstercard : Card
     {
 
 

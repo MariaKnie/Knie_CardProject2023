@@ -63,33 +63,39 @@ namespace Server.Server.Requests
             HTTP_Response response = new HTTP_Response();
             string description = $"Specific User {requesttype}";
             string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
 
-            string name = userInfo?["subpath"];
+            Console.WriteLine(fullinfo);
 
             responseHTML += "<html> <body> \n";
-            responseHTML += $"<h1> {requesttype}  Specific User Reques </h1>";
-            responseHTML += $"\n Username: {name}";
-            responseHTML += "\n Token: " + userInfo?["token"];
-            responseHTML += "\n FullBody: " + userInfo?["subpath"];
+            responseHTML += $"<h1> {requesttype} Specific User </h1>";
+            responseHTML += "\n Token: " + token;
+            responseHTML += "\n FullBody: " + userInfo?["body"];
+
+            UserEndpoint user = GetUserByToken(token);
 
             if (requesttype == "GET")
             {
-              //change data of user
-            }
-            else if (requesttype == "POST")
-            {
+                if (fullinfo.Length>0) // change user data
+                {
+                    responseHTML += "\n Change User Data";
+                }
+                else // get user data
+                {
+                    responseHTML += "\n Get User Data \n\n";
+                    responseHTML += "\n { \"User\": {";
 
+                    responseHTML += JsonSerializer.Serialize<UserEndpoint>(user);
+                    responseHTML += "\n } \n}";
+                }
             }
-            else if (requesttype == "DEL")
-            {
 
-            }
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
 
-        }
-
+        }    
         public bool SeeIfUserIsINDB(string username)
         {
             // Connection

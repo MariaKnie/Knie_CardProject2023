@@ -102,7 +102,7 @@ namespace Server.Server
 
         public int CheckIfUserHasDeckCards(UserEndpoint user)
         {
-            if (user== null)
+            if (user == null)
             {
                 return -1;
             }
@@ -292,7 +292,7 @@ namespace Server.Server
                 List<string> NewDeckIDs = new List<string>();
                 string temp = fullinfo.ToString();
                 temp = temp.Substring(1);
-                temp = temp.Remove(temp.Length-1);
+                temp = temp.Remove(temp.Length - 1);
                 Console.WriteLine("Snipping starting!");
                 Console.WriteLine(temp);
                 try
@@ -301,7 +301,7 @@ namespace Server.Server
                     for (int i = 0; i < 5; i++)
                     {
                         parts1[i] = parts1[i].Trim();
-                        parts1[i] = parts1[i].Remove(parts1[i].Length-1);
+                        parts1[i] = parts1[i].Remove(parts1[i].Length - 1);
                         parts1[i] = parts1[i].Substring(1);
                         Console.WriteLine(" Snip : " + parts1[i]);
                         NewDeckIDs.Add(parts1[i]);
@@ -315,7 +315,7 @@ namespace Server.Server
                     response.UniqueResponse(writer, 200, description, responseHTML);
                     return;
                 }
-               
+
 
                 if (user != null)
                 {
@@ -390,14 +390,14 @@ namespace Server.Server
             for (int i = 0; i < ids.Count; i++)
             {
 
-            using IDbCommand command = connection.CreateCommand();
-            string query = "UPDATE cards SET card_indeck = false WHERE id = @card_id";
+                using IDbCommand command = connection.CreateCommand();
+                string query = "UPDATE cards SET card_indeck = false WHERE id = @card_id";
                 command.CommandText = query;
 
-            // parameters
-            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, ids[i]);
+                // parameters
+                GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, ids[i]);
 
-              command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
             }
         }
 
@@ -427,10 +427,107 @@ namespace Server.Server
         }
 
 
-        public async Task DeckPlainRequest(StreamWriter writer, string requesttype)
-    {
-        HTTP_Response response = new HTTP_Response();
-        response.UniqueResponse(writer, 200, $"DeckPlainRequest {requesttype}", $"<html> <body> <h1> {requesttype} DeckPlainRequest Request! </h1> </body> </html>");
+        public async Task DeckPlainRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"User Deck Request{requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
+
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} User Deck Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "GET")
+            {
+                // show deck cards
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+                if (user != null)
+                {
+                    responseHTML += "\n Found User by token";
+                }
+                int cardCount = CheckIfUserHasDeckCards(user);
+
+                if (cardCount >= 0)
+                {
+                    if (cardCount > 0)
+                    {
+                        responseHTML += "\n Able to Show Deckcards";
+                        responseHTML += ShowAllUserDeckCardsPlain(user);
+                        responseHTML += "\n Showed DeckCards";
+                    }
+                    else
+                    {
+                        responseHTML += "\n UNABLE to DeeckShow cards, No Cards in Account";
+                    }
+                }
+                else
+                {
+                    responseHTML += "\n Error While trying to read cards";
+                }
+            }
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, 200, description, responseHTML);
+
+        }
+
+
+        public string ShowAllUserDeckCardsPlain(UserEndpoint user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM cards WHERE user_id = @user_id AND card_indeck = true";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.id);
+
+            using IDataReader reader = command.ExecuteReader();
+            int count = 0;
+            string jsonToSendBack = "\ndeck_cards\n";
+            while (reader.Read())
+            {
+                count++;
+                CardEndpoint readCard = new()
+                {
+                    id = (string)reader["id"],
+                    Name = (string)reader["card_name"],
+                    Damage = (int)reader["card_damage"],
+                    CardType = (string)reader["card_type"],
+                    ElementType = (string)reader["card_element"],
+                    Description = ""
+
+                };
+
+                int columnIndex = reader.GetOrdinal("card_description");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    user.description = (string)reader["card_description"];
+                }
+
+                Console.WriteLine($"CardNumber {count}");
+                readCard.PrintCard();
+                jsonToSendBack += $"\n\n Card: {count}\n";
+                jsonToSendBack += readCard.PrintCard();
+            }
+            Console.WriteLine();
+            Console.WriteLine(jsonToSendBack);
+
+            return jsonToSendBack;
+        }
     }
-}
 }

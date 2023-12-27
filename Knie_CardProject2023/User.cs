@@ -32,7 +32,21 @@ namespace Knie_CardProject2023
 
         }
 
+        public User(string username, string password, int wins, int loses, int id)
+        {
+            this.id = id;
+            this.username = username;
+            this.password = password;
+            this.wins = wins;
+            this.loses = loses;
 
+        }
+
+        public int Id
+        {
+            get { return id; }
+            set { }
+        }
         public string Username
         {
             get { return username; }
