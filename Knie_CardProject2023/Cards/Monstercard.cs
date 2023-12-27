@@ -16,13 +16,26 @@ namespace Knie_CardProject2023
             base.Attack();
         }
 
+        public Monstercard()
+        {
+
+        }
+        public Monstercard(string id, string name, float damage, string card_type, string element_type, string description)
+        {
+            this.id = id;
+            this.name = name;
+            this.damage = damage;
+            this.card_type = card_type;
+            this.element_type = element_type;
+            this.description = description;
+        }
         public override Monstercard GenerateCard()
         {
             Random rnd = new Random();
             int num = rnd.Next(7);
 
             Monstercard newCard = new Monstercard();
-            newCard.CardType = "Monstercard";
+            newCard.CardType = "Monster";
             if (num == 0)
             {
                 //Dragon

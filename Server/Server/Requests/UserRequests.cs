@@ -10,6 +10,7 @@ using System.Data;
 using Npgsql;
 using Server.Server.Requests;
 using Microsoft.VisualBasic;
+using Server.Server.EndPoints;
 
 namespace Server.Server.Requests
 {
@@ -380,5 +381,70 @@ namespace Server.Server.Requests
             response.UniqueResponse(writer, 200, description, responseHTML);
         }
 
+
+
+        public void GetPlayerDeckCards(ref User user)
+        {
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM cards WHERE user_id = @user_id AND card_indeck = true";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            using IDataReader reader = command.ExecuteReader();
+            int count = 0;
+            Console.WriteLine("READING CARDS FROM PLAYER " + user.Username); 
+            while (reader.Read())
+            {
+                count++;
+                CardEndpoint readCard = new()
+                {
+                    id = (string)reader["id"],
+                    Name = (string)reader["card_name"],
+                    Damage = (int)reader["card_damage"],
+                    CardType = (string)reader["card_type"],
+                    ElementType = (string)reader["card_element"],
+                    Description = ""
+
+                };
+
+                int columnIndex = reader.GetOrdinal("card_description");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    readCard.Description = (string)reader["card_description"];
+                }
+
+                Console.WriteLine($"CardNumber {count}");
+                readCard.PrintCard();
+                packageEndPoint.package.Add(readCard);
+
+                if (readCard.CardType == "Spell")
+                {
+                    SpellCard spellCard = new SpellCard(readCard.id, readCard.Name, readCard.Damage, readCard.CardType, readCard.ElementType, readCard.Description);
+                    user.Deck.Cards.Add(spellCard);
+                    spellCard.PrintCard();
+                }
+                else if (readCard.CardType == "Monster")
+                {
+                    Monstercard spellCard = new Monstercard(readCard.id, readCard.Name, readCard.Damage, readCard.CardType, readCard.ElementType, readCard.Description);
+                    user.Deck.Cards.Add(spellCard);
+                    spellCard.PrintCard();
+                }
+
+
+            }
+            Console.WriteLine();
+
+
+        }
     }
 }

@@ -8,7 +8,19 @@ namespace Knie_CardProject2023
 {
     public class SpellCard : Card
     {
+        public SpellCard()
+        {
 
+        }
+        public SpellCard(string id, string name, float damage, string card_type, string element_type, string description)
+        {
+            this.id = id;
+            this.name = name;
+            this.damage = damage;
+            this.card_type = card_type;
+            this.element_type = element_type;
+            this.description = description;
+        }
 
         public override void Attack()
         {
@@ -22,7 +34,7 @@ namespace Knie_CardProject2023
             int num = rnd.Next(3);
 
             SpellCard newCard = new SpellCard();
-            newCard.CardType = "SpellCard";
+            newCard.CardType = "Spell";
             if (num == 0)
             {
                 //Water

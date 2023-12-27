@@ -516,7 +516,7 @@ namespace Server.Server
                 if (!reader.IsDBNull(columnIndex))
                 {
 
-                    user.Bio = (string)reader["card_description"];
+                    readCard.Description = (string)reader["card_description"];
                 }
 
                 Console.WriteLine($"CardNumber {count}");

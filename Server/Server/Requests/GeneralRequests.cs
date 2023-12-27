@@ -1,4 +1,5 @@
 ﻿using Knie_CardProject2023;
+using Knie_CardProject2023.Logic;
 using Knie_CardProject2023.Server;
 using Npgsql;
 using Server.Server.EndPoints;
@@ -35,7 +36,7 @@ namespace Server.Server.Requests
 
             if (requesttype == "GET")
             {
-               
+
             }
             else if (requesttype == "POST")
 
@@ -44,7 +45,7 @@ namespace Server.Server.Requests
               // if active then deny
 
                 int id = UserLoginDataCheck(userToEndpoint);
-                if (id >=0)
+                if (id >= 0)
                 {
                     // Login Data is correct
                     responseHTML += "\n UserData Correct";
@@ -75,7 +76,7 @@ namespace Server.Server.Requests
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
- 
+
         }
 
 
@@ -96,7 +97,7 @@ namespace Server.Server.Requests
             AddParameterWithValue(command, "@Username", DbType.String, user.Username);
             AddParameterWithValue(command, "@Password", DbType.String, user.Password);
 
-           var result = command.ExecuteScalar();
+            var result = command.ExecuteScalar();
 
             if (result == null)
             {
@@ -138,7 +139,7 @@ namespace Server.Server.Requests
         }
 
         public void AddTokenForUser(int id, UserEndpoint user)
-        { 
+        {
             // Connection
             var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
             using IDbConnection connection = new NpgsqlConnection(connString);
@@ -173,7 +174,7 @@ namespace Server.Server.Requests
             command.ExecuteNonQuery();
         }
 
-      
+
         public async Task ScoreboardRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -233,7 +234,7 @@ namespace Server.Server.Requests
                 count++;
                 UserEndpoint user_Read = new()
                 {
-                    Username = (string)reader["username"],            
+                    Username = (string)reader["username"],
                     Wins = (int)reader["wins"]
                 };
 
@@ -244,6 +245,8 @@ namespace Server.Server.Requests
             return jsonToSendBack;
         }
 
+
+        public static List<List<User>> playerlist = new List<List<User>>();
         public async Task BattleRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -266,9 +269,56 @@ namespace Server.Server.Requests
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
 
+                User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id);
                 if (user != null)
                 {
-                  
+                    responseHTML += "\n Looking for Game";
+                    bool foundSpot = false;
+
+                    List<Card> PlayerDeck = new List<Card>();
+                    ur.GetPlayerDeckCards(ref Carduser);
+                    // Game.GameLoop(usersList, 0);
+
+                    if (playerlist.Count < 1) // first player
+                    {
+                        playerlist.Add(new List<User>());
+                        playerlist[0].Add(Carduser);
+                        responseHTML += "\n First Playeer, Waiting for Players";
+                    }
+                    else
+                    {
+
+
+                        for (int i = 0; i < playerlist.Count; i++)
+                        {
+                            if (playerlist[i].Count() < 2)
+                            {
+                                foundSpot = true;
+                                responseHTML += "\n Found Spot!";
+
+                                playerlist[i].Add(Carduser);
+                                if (playerlist[i].Count() == 2)
+                                {
+                                    responseHTML += "\n Battle Begin!";
+                                    Game.GameLoop(playerlist[i], 0);
+                                }
+                                else
+                                {
+                                    responseHTML += "\n Waiting for Player";
+                                }
+                                break;
+                            }
+                        }
+
+                        if (!foundSpot)
+                        {
+                            playerlist.Add(new List<User>());
+                            playerlist[playerlist.Count - 1].Add(Carduser);
+                            responseHTML += "\n Waiting for Player";
+                        }
+                    }
+
+
                 }
                 else
                 {
