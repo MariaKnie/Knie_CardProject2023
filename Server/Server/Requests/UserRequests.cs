@@ -362,7 +362,7 @@ namespace Server.Server.Requests
 
                 if (user != null)
                 {
-                    int matches = user.Wins + user.Loses;
+                    int matches = user.Matches;
                     float win_perc = 0;
                     float lose_perc = 0;
                     float drawchance = 0;
@@ -384,7 +384,7 @@ namespace Server.Server.Requests
                     responseHTML += $"\nWinChance: {win_perc }%";
                     responseHTML += $"\nLoseChance: {lose_perc}%";
                     responseHTML += $"\nDrawChance: {drawchance}%";
-                    responseHTML += $"\nMatches Played: {matches}";
+                    responseHTML += $"\nMatches Played: {user.Matches}";
                     responseHTML += $"\nELO: {user.Elo}";
                 }
                 else

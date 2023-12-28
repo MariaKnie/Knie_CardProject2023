@@ -18,7 +18,7 @@ namespace Knie_CardProject2023
         private int loses;
         private int coins = 20;
         private int elo = 100;
-        private int matches = 0;
+        private int matches;
 
 
         private CardDeck deck = new CardDeck();
