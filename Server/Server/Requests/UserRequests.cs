@@ -301,7 +301,9 @@ namespace Server.Server.Requests
                     Image = "",
                     Coins = (int)reader["coins"],
                     Wins = (int)reader["wins"],
-                    Loses = (int)reader["loses"]
+                    Loses = (int)reader["loses"],
+                    Elo = (int)reader["elo"],
+                    Matches = (int)reader["matches"],
 
                 };
 

@@ -10,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Server.Server.Requests
@@ -247,9 +248,14 @@ namespace Server.Server.Requests
         }
 
 
-        public static List<List<User>> playerlist = new List<List<User>>();
-        public static List<List<string>> deckcard_ids = new List<List<string>>();
-        public static List<Dictionary<string, string>> GameLog = new List<Dictionary<string, string>>();   
+        public static Dictionary<int, List<User>> playerLobbylist = new Dictionary<int, List<User>>();
+        public static Dictionary<int, List<List<string>>> deckcard_ids = new Dictionary< int, List<List<string>>>();
+        public static Dictionary<int, Dictionary<string, string>> GameLog = new Dictionary< int, Dictionary<string, string>>();
+        static int currentLobbycount = 0;
+        static Mutex mutex_Playerlist = new Mutex();
+        static Mutex mutex_GameLog = new Mutex();
+        static Mutex mutex_Deckids = new Mutex();
+        // would need a mutex list for better performance;
         public async Task BattleRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -267,130 +273,90 @@ namespace Server.Server.Requests
             bool battle = false;
             int posinPlayList = 0;
 
-
+            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
 
             if (requesttype == "GET")
             {
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
 
-                User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id);
+                User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id, user.Matches, user.Elo);
                 if (user != null)
                 {
-                    responseHTML += "\n Looking for Game";
+                    responseHTML += "\n Looking for Game Lobby";
                     bool foundSpot = false;
 
                     List<Card> PlayerDeck = new List<Card>();
                     ur.GetPlayerDeckCards(ref Carduser);
 
-
-                   
-                    // Game.GameLoop(usersList, 0);
-
-                    if (playerlist.Count < 1) // first player
+                    mutex_Playerlist.WaitOne();
+                    for (int i = 0; i < playerLobbylist.Count; i++)
                     {
-                        playerlist.Add(new List<User>());
-                        GameLog.Add(new Dictionary<string, string>());
-                        playerlist[0].Add(Carduser);
-                        responseHTML += "\n First Playeer, Waiting for Players";
-                        posinPlayList = 0;
-                        GameLog[posinPlayList].Add("Battle", "null");
-                        foundSpot = true;
-
-                        Console.WriteLine("First Player");
-                    }
-                    else
-                    {
-
-
-                        for (int i = 0; i < playerlist.Count; i++)
+                        if (playerLobbylist.ElementAt(i).Value.Count() == 1) // found free spot
                         {
-                            if (playerlist[i].Count() < 2)
-                            {
-                                foundSpot = true;
-                                responseHTML += "\n Found Spot!";
-                                Console.WriteLine("Found Spot!");
-                                playerlist[i].Add(Carduser);
-                                posinPlayList = i;
+                            foundSpot = true;
+                            posinPlayList = playerLobbylist.ElementAt(i).Key; // get lobby number
+                            playerLobbylist[posinPlayList].Add(Carduser); // add user
 
-                                if (playerlist[i].Count() == 1)
-                                {
-                                    responseHTML += "\n Waiting for Player";
-                                    GameLog[posinPlayList].Add("Battle", "null");
-                                }
-                                if (playerlist[i].Count() == 2)  // can play
-                                {
-                                    battle = true;
-                                }
-                            }
+                            responseHTML += "\n Found Spot!";
+                            Console.WriteLine("Found Spot!");
+
+                            if (playerLobbylist[posinPlayList].Count() == 2)  // can play
+                            {
+                                battle = true;
+                            }                            
                             break;
-                        }
-                    }
+                        }                     
+                    }             
 
-                    if (!foundSpot)
+                    if (!foundSpot) // No spots open
                     {
-                        playerlist.Add(new List<User>());
-                        GameLog.Add(new Dictionary<string, string>());
-                        posinPlayList = playerlist.Count - 1;
-                        playerlist[posinPlayList].Add(Carduser);
-                        responseHTML += "\n Waiting for Player";
-                        GameLog[posinPlayList].Add("Battle", "null");
+                        foundSpot = true;
+                        posinPlayList = currentLobbycount++; // neew lobby count
+
+                        playerLobbylist.Add(posinPlayList, new List<User>()); // open lobby
+                        playerLobbylist[posinPlayList].Add(Carduser); // add user
+
+                        GameLog.Add(posinPlayList, new Dictionary<string, string>()); // open log
+                        GameLog[posinPlayList].Add("Battle", "null"); // add log
+
+                        responseHTML += "\n Single Playeer, Waiting for Players";
+                        Console.WriteLine("Single Player");
                     }
+                    mutex_Playerlist.ReleaseMutex();
 
-
-
-                    if (battle) // start battle
+                    if (battle) // start battle, last player to join stats battle
                     {
-                        List<User> playersOfRound = playerlist[posinPlayList];
-
-                        for (int p = 0; p < playersOfRound.Count; p++)
-                        {
-                            deckcard_ids.Add(new List<string>());// for every player a list of ids
-                            for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
-                            {
-                                deckcard_ids[deckcard_ids.Count - 1].Add(playersOfRound[p].Deck.Cards[c].Id);
-                            }
-                        }
+                        List<User> playersOfRound = playerLobbylist[posinPlayList]; // get user in lobby
+                        GetPlayerDecksIDS(playersOfRound, posinPlayList); // get Player card ids
 
                         responseHTML += "\n Battle Begin!";
                         int status = Game.GameLoop(playersOfRound, 0); // Actual Battle
-                        if (status < 0)
+
+                        if (status < 0) // Game return status, errorcodes
                         {
-                            if (status == -1)
+                            if (status == -1) // draw
                             {
-                                //responseHTML += "\nDraw!";
                                 GameLog[posinPlayList].Add("Log", $"\nDraw!");
                             }
                         }
-                        else
+                        else // there is a winner
                         {
                             Console.WriteLine($"STATUS {status}!");
                             Console.WriteLine($"Player {playersOfRound[status].Username} Won!");
-                           // responseHTML += $"\nPlayer {playersOfRound[status].Username} Won!";
-                            GameLog[posinPlayList].Add("Log", $"\nPlayer {playersOfRound[status].Username} Won!");
-                            for (int p = 0; p < playersOfRound.Count; p++) // take over cards
-                            {
-                                for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
-                                {
-                                    if (!deckcard_ids[p].Contains(playersOfRound[p].Deck.Cards[c].Id))
-                                    {
-                                        ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
-                                    }
-                                }
-                            }
 
+                            GameLog[posinPlayList].Add("Log", $"\nPlayer {playersOfRound[status].Username} Won!");
+                            UpdatePlaylistAfterBattle(playersOfRound, status, posinPlayList); // update cards and user stats
                         }
 
-
-                       
-                        GameLog[posinPlayList]["Battle"] =  "done";
+                        GameLog[posinPlayList]["Battle"] = "done"; // cue for first player
                     }
 
                     while (GameLog[posinPlayList]["Battle"] != "done") //waiting for second player
                     {
                         //Console.WriteLine("\n Waiting for Player");
                     }
-                    responseHTML += GameLog[posinPlayList]["Log"];
+                    responseHTML += GameLog[posinPlayList]["Log"]; // players get battle log
                 }
                 else
                 {
@@ -401,20 +367,76 @@ namespace Server.Server.Requests
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, 200, description, responseHTML);
 
+            // Clear list and clos lobby
+            mutex_Playerlist.WaitOne();
+            mutex_Deckids.WaitOne();
+            mutex_GameLog.WaitOne();
             if (GameLog[posinPlayList].ContainsKey("Ended"))
             {
-                GameLog[posinPlayList]["Ended"] =  "2";
-                playerlist[posinPlayList].Clear();
+                GameLog[posinPlayList]["Ended"] = "2";
+
+                // clear
+                playerLobbylist[posinPlayList].Clear();
                 GameLog[posinPlayList].Clear();
                 deckcard_ids[posinPlayList].Clear();
+
+                // remove
+                playerLobbylist.Remove(posinPlayList);
+                GameLog.Remove(posinPlayList);
+                deckcard_ids.Remove(posinPlayList);
             }
             else
             {
                 GameLog[posinPlayList].Add("Ended", "1");
             }
-           
+            mutex_Playerlist.ReleaseMutex();
+            mutex_Deckids.ReleaseMutex();
+            mutex_GameLog.ReleaseMutex();
 
+            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
         }
+
+
+        public void GetPlayerDecksIDS(List<User> playersOfRound, int pos)
+        {
+            mutex_Deckids.WaitOne();
+            deckcard_ids.Add( pos, new List<List<string>>());// for current lobby
+            for (int p = 0; p < playersOfRound.Count; p++)
+            {
+                deckcard_ids[pos].Add(new List<string>());// for every player a list of ids
+
+                for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
+                {
+                    deckcard_ids[pos][p].Add(playersOfRound[p].Deck.Cards[c].Id);
+                    deckcard_ids[pos][p].Add(playersOfRound[p].Deck.Cards[c].Id);
+                }
+            }
+            mutex_Deckids.ReleaseMutex();
+        }
+        public void UpdatePlaylistAfterBattle(List<User> playersOfRound, int status, int posinLobby)
+        {
+            for (int p = 0; p < playersOfRound.Count; p++) // take over cards
+            {
+                if (status == p)
+                {
+                    playersOfRound[p].Wins++;
+
+                }
+                else
+                {
+                    playersOfRound[p].Loses++;
+                }
+
+                for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
+                {
+                    if (!deckcard_ids[posinLobby][p].Contains(playersOfRound[p].Deck.Cards[c].Id))
+                    {
+                        ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
+                    }
+                }
+            }
+        }
+
 
 
         public void ChangeCardToPlayer(string card_id, int user_id)
@@ -426,7 +448,7 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "UPDATE cards SET user_id = @user_id WHERE id = @card_id;";
+            string query = "UPDATE cards SET user_id = @user_id, card_indeck = false WHERE id = @card_id;";
 
             command.CommandText = query;
 

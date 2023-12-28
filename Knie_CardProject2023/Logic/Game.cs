@@ -87,9 +87,7 @@ namespace Knie_CardProject2023.Logic
                 Card temp = usersList[lost].Deck.Cards[toRemove];
                 usersList[lost].Deck.Cards.RemoveAt(toRemove);
 
-                usersList[won].Deck.Cards.Add(temp);
-                usersList[won].Wins++;
-                usersList[lost].Loses++;
+                usersList[won].Deck.Cards.Add(temp);            
             }
 
             return won;

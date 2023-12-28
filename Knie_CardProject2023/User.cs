@@ -17,6 +17,8 @@ namespace Knie_CardProject2023
         private int wins;
         private int loses;
         private int coins = 20;
+        private int elo = 100;
+        private int matches = 0;
 
 
         private CardDeck deck = new CardDeck();
@@ -31,17 +33,40 @@ namespace Knie_CardProject2023
             this.loses = loses;
 
         }
-
-        public User(string username, string password, int wins, int loses, int id)
+        public User(string username, string password, int wins, int loses, int id, int matches, int eLO)
         {
             this.id = id;
             this.username = username;
             this.password = password;
             this.wins = wins;
             this.loses = loses;
-
+            this.matches = matches;
+            this.elo = eLO;
+        }
+        public User(string username, string password, int wins, int loses, int id, int matches, CardDeck deck, CardStack stack, int eLO)
+        {
+            this.id = id;
+            this.username = username;
+            this.password = password;
+            this.wins = wins;
+            this.loses = loses;
+            this.matches = matches;
+            this.deck = deck;
+            this.stack = stack;
+            this.elo = eLO;
         }
 
+        public int ELO
+        {
+            get { return elo; }
+            set { elo = value; }
+        }
+
+        public int Matches
+        {
+            get { return matches; }
+            set { matches = value; }
+        }
         public int Id
         {
             get { return id; }

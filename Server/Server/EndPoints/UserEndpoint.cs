@@ -17,6 +17,9 @@ namespace Server.Server
         public int Coins { get; set; }
         public int Wins { get; set; }
         public int Loses { get; set; }
+        public int Elo { get; set; }
+        public int Matches { get; set; }
+
 
     }
 }
