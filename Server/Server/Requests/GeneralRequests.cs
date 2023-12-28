@@ -290,6 +290,7 @@ namespace Server.Server.Requests
                         responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
                         responseHTML += "\n</body> </html>";
                         response.UniqueResponse(writer, 400, description, responseHTML);
+                        return;
                     }
                     responseHTML += "\n Looking for Game Lobby";
                     bool foundSpot = false;
@@ -346,6 +347,12 @@ namespace Server.Server.Requests
                             if (status == -1) // draw
                             {
                                 GameLog[posinPlayList].Add("Log", $"\nDraw!");
+
+                                for (int i = 0; i < playersOfRound.Count; i++)
+                                {
+                                    playersOfRound[i].Matches++;
+                                    ChangeStatsOfPlayer(playersOfRound[i]);
+                                }
                             }
                         }
                         else // there is a winner
@@ -434,7 +441,7 @@ namespace Server.Server.Requests
             else
             {
                 Console.WriteLine("Deck found!");
-                int count = (int)result;
+                int count = (int)(long)result;
                 if (count < 4)
                 {
                     Console.WriteLine("Too Little Cards");
@@ -445,8 +452,6 @@ namespace Server.Server.Requests
                     return true;
                 }
             }
-
-
         }
 
         public void GetPlayerDecksIDS(List<User> playersOfRound, int pos)
