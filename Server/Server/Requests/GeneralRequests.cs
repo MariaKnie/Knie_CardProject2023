@@ -221,7 +221,7 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT username, wins FROM users ORDER BY wins;";
+            string query = "SELECT username, wins FROM users ORDER BY wins DESC;";
             command.CommandText = query;
 
 

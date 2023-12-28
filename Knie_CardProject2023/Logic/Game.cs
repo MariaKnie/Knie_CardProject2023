@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Knie_CardProject2023.Logic
 {
@@ -37,35 +41,52 @@ namespace Knie_CardProject2023.Logic
         public static int CompareCards(List<User> usersList, int rounds)
         {
             Random rnd = new Random();
-            int num = rnd.Next(usersList[0].Deck.Cards.Count);
+            int num_0 = rnd.Next(usersList[0].Deck.Cards.Count);
 
 
             rnd = new Random();
-            int num2 = rnd.Next(usersList[1].Deck.Cards.Count);
+            int num_1 = rnd.Next(usersList[1].Deck.Cards.Count);
             int won;
             int lost;
             int toRemove;
             bool draw = false;
             Console.WriteLine("****************************************************");
-            Console.WriteLine($"User {usersList[0].Username}: Card [{num}]: ");
-            usersList[0].Deck.Cards[num].PrintCard();
+            Console.WriteLine($"User {usersList[0].Username}: Card [{num_0}]: ");
+            usersList[0].Deck.Cards[num_0].PrintCard();
             Console.WriteLine(" V E R S U S ");
-            Console.WriteLine($"User {usersList[1].Username}: Card [{num2}]: ");
-            usersList[1].Deck.Cards[num2].PrintCard();
+            Console.WriteLine($"User {usersList[1].Username}: Card [{num_1}]: ");
+            usersList[1].Deck.Cards[num_1].PrintCard();
             Console.WriteLine("****************************************************");
 
-            if (usersList[0].Deck.Cards[num].Damage > usersList[1].Deck.Cards[num2].Damage)
+            float effect1 = 1;
+            float effect2 = 1;
+            List<Card> cards = new List<Card>();
+            cards.Add(usersList[0].Deck.Cards[num_0]);
+            cards.Add(usersList[1].Deck.Cards[num_1]);
+
+            Console.WriteLine($"Damage: {usersList[0].Deck.Cards[num_0].Damage} VS {usersList[1].Deck.Cards[num_1].Damage} ");
+
+            CheckEffect(cards, ref effect1, ref effect2);
+            Console.WriteLine($"Effect1: {effect1} \nEffect2: {effect2}");
+
+            SpecialityEffect(cards, ref effect1, ref effect2);
+
+            float dmgPlayer1 = usersList[0].Deck.Cards[num_0].Damage * effect1;
+            float dmgPlayer2 = usersList[1].Deck.Cards[num_1].Damage * effect2;
+
+
+            if (dmgPlayer1 > dmgPlayer2) // player 1 won
             {
                 won = 0;
                 lost = 1;
-                toRemove = num2;
+                toRemove = num_1;
             }
-            else if (usersList[0].Deck.Cards[num].Damage < usersList[1].Deck.Cards[num2].Damage)
+            else if (dmgPlayer1 < dmgPlayer2) // player 2 won
             {
                 
                 won = 1;
                 lost = 0;
-                toRemove = num;
+                toRemove = num_0;
             }
             else // Draw
             {
@@ -93,8 +114,62 @@ namespace Knie_CardProject2023.Logic
             return won;
 
         }
+        public static void CheckEffect(List<Card> cards, ref float effect1, ref float effect2)
+        {
+            if (cards.Count ==2 && cards[0].CardType == "Spell" || cards[1].CardType == "Spell") // if any is spellcard
+            {
 
-        public static void FillDecks(List<User> usersList)
+                for (int i = 0; i < cards.Count; i++)
+                {
+                    if (cards[i].ElementType == "Fire")
+                    {
+                        if (i < cards.Count - 1 && cards[i + 1].ElementType == "Water")
+                        {
+                            effect1 = 0.5f;
+                            effect2 = 2f;
+                        }
+                        else if (i >0 && cards[i - 1].ElementType == "Water")
+                        {
+                            effect1 = 2f;
+                            effect2 = 0.5f;
+                        }
+                    }
+                }
+                Console.WriteLine($"New Damage: {cards[0].Damage * effect1} VS {cards[1].Damage * effect2} ");
+
+            }
+        }  
+        public static void SpecialityEffect(List<Card> cards, ref float effect1, ref float effect2)
+        {
+            CheckNames(cards, ref effect1, ref effect2, "Dragon", "Goblin");
+            CheckNames(cards, ref effect1, ref effect2, "Wizzard", "Ork");
+            CheckNames(cards, ref effect1, ref effect2, "Knight", "WaterSpell");
+            CheckNames(cards, ref effect1, ref effect2, "Kraken", "Spell");
+            CheckNames(cards, ref effect1, ref effect2, "FireElve", "Dragon");
+        }
+
+        public static void CheckNames(List<Card> cards, ref float effect1, ref float effect2, string first, string second)
+        {
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Name.Contains(first))
+            {
+                    if (i < cards.Count - 1 && cards[i + 1].Name.Contains(second))
+                    {
+                        effect1 = 1;
+                        effect2 = 0;
+                    }
+                    else if (i > 0 && cards[i - 1].Name.Contains(second))
+                    {
+                        effect1 = 0;
+                        effect2 = 1;
+
+                    }
+                }
+            }
+        }
+
+            public static void FillDecks(List<User> usersList)
         {
             Console.WriteLine($"\nFilling Deck");
             for (int i = 0; i < usersList.Count; i++)

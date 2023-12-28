@@ -46,7 +46,7 @@ namespace Knie_CardProject2023
             else if (num == 1)
             {
                 //Goblins
-                newCard.name = "Goblins";
+                newCard.name = "Goblin";
                 newCard.damage = 40;
                 newCard.element_type = "Normal";
             }
@@ -60,14 +60,14 @@ namespace Knie_CardProject2023
             else if (num == 3)
             {
                 //Orks
-                newCard.name = "Orks";
+                newCard.name = "Ork";
                 newCard.damage = 50;
                 newCard.element_type = "Normal";
             }
             else if (num == 4)
             {
                 //Knights
-                newCard.name = "Knights";
+                newCard.name = "Knight";
                 newCard.damage = 50;
                 newCard.element_type = "Normal";
             }
@@ -81,7 +81,7 @@ namespace Knie_CardProject2023
             else if (num == 6)
             {
                 //FireElves
-                newCard.name = "FireElves";
+                newCard.name = "FireElve";
                 newCard.damage = 20;
                 newCard.element_type = "Fire";
             }
