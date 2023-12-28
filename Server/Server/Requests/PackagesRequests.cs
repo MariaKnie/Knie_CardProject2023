@@ -36,6 +36,7 @@ namespace Server.Server.Requests
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
+            int responseCode = 200;
 
             Console.WriteLine(fullinfo);
 
@@ -64,17 +65,21 @@ namespace Server.Server.Requests
                     else
                     {
                         responseHTML += "\n UNABLE to Buy Package, too little coins";
+                        responseCode = 500;
                     }
                 }
                 else
                 {
                     responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
                 }
             }
+            else
+                responseCode = 400;
 
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
        

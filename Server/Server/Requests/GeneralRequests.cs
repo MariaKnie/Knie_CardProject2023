@@ -23,10 +23,10 @@ namespace Server.Server.Requests
         }
         public async Task SessionRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
-
             HTTP_Response response = new HTTP_Response();
             string description = $"Session Request {requesttype}";
             string responseHTML = "";
+            int responseCode = 200;
 
             responseHTML += "<html> <body> \n";
             responseHTML += $"<h1> {requesttype}  Login User Request </h1>";
@@ -36,12 +36,7 @@ namespace Server.Server.Requests
             responseHTML += $"\n Username: {userToEndpoint.Username}";
             responseHTML += $"\n Password: {userToEndpoint.Password}";
 
-            if (requesttype == "GET")
-            {
-
-            }
-            else if (requesttype == "POST")
-
+            if (requesttype == "POST")
             { // check if token for user is active 
               // if no active then login
               // if active then deny
@@ -61,24 +56,22 @@ namespace Server.Server.Requests
                     }
                     else
                     {
-
                         responseHTML += "\n User already Logged in!";
+                        responseCode = 400;
                     }
                 }
                 else
                 {
                     responseHTML += "\n UserData Incorrect";
+                    responseCode = 400;
                 }
 
             }
-            else if (requesttype == "DEL")
-            {
-
-            }
+            else
+                responseCode = 400;
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
-
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
 
@@ -185,6 +178,7 @@ namespace Server.Server.Requests
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
 
+            int responseCode = 200;
             Console.WriteLine(fullinfo);
 
             responseHTML += "<html> <body> \n";
@@ -208,12 +202,15 @@ namespace Server.Server.Requests
                 else
                 {
                     responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
                 }
             }
+            else
+                responseCode = 400;
 
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
         public string GetPlayerScoreboard(UserEndpoint user)
         {
@@ -249,8 +246,8 @@ namespace Server.Server.Requests
 
 
         public static Dictionary<int, List<User>> playerLobbylist = new Dictionary<int, List<User>>();
-        public static Dictionary<int, List<List<string>>> deckcard_ids = new Dictionary< int, List<List<string>>>();
-        public static Dictionary<int, Dictionary<string, string>> GameLog = new Dictionary< int, Dictionary<string, string>>();
+        public static Dictionary<int, List<List<string>>> deckcard_ids = new Dictionary<int, List<List<string>>>();
+        public static Dictionary<int, Dictionary<string, string>> GameLog = new Dictionary<int, Dictionary<string, string>>();
         static int currentLobbycount = 0;
         static Mutex mutex_Playerlist = new Mutex();
         static Mutex mutex_GameLog = new Mutex();
@@ -273,6 +270,8 @@ namespace Server.Server.Requests
             bool battle = false;
             int posinPlayList = 0;
 
+            int responseCode = 200;
+
             Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
 
             if (requesttype == "GET")
@@ -283,6 +282,15 @@ namespace Server.Server.Requests
                 User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id, user.Matches, user.Elo);
                 if (user != null)
                 {
+                    responseHTML += "\n Checking Deck";
+
+                    bool playAblee = CheckIfUserHasEnoughCards(user);
+                    if (!playAblee)
+                    {
+                        responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
+                        responseHTML += "\n</body> </html>";
+                        response.UniqueResponse(writer, 400, description, responseHTML);
+                    }
                     responseHTML += "\n Looking for Game Lobby";
                     bool foundSpot = false;
 
@@ -304,10 +312,10 @@ namespace Server.Server.Requests
                             if (playerLobbylist[posinPlayList].Count() == 2)  // can play
                             {
                                 battle = true;
-                            }                            
+                            }
                             break;
-                        }                     
-                    }             
+                        }
+                    }
 
                     if (!foundSpot) // No spots open
                     {
@@ -361,13 +369,17 @@ namespace Server.Server.Requests
                 else
                 {
                     responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
                 }
             }
+            else
+                responseCode = 400;
+
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
 
-            // Clear list and clos lobby
+            // Clear list and close lobby
             mutex_Playerlist.WaitOne();
             mutex_Deckids.WaitOne();
             mutex_GameLog.WaitOne();
@@ -396,18 +408,57 @@ namespace Server.Server.Requests
             Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
         }
 
+        public bool CheckIfUserHasEnoughCards(UserEndpoint user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id AND card_indeck = true;";
+
+            command.CommandText = query;
+
+            // parameters
+            AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            var result = command.ExecuteScalar();
+
+            if (result == null)
+            {
+                Console.WriteLine("DeckCards couldnt be found");
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Deck found!");
+                int count = (int)result;
+                if (count < 4)
+                {
+                    Console.WriteLine("Too Little Cards");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+
+        }
 
         public void GetPlayerDecksIDS(List<User> playersOfRound, int pos)
         {
             mutex_Deckids.WaitOne();
-            deckcard_ids.Add( pos, new List<List<string>>());// for current lobby
+            deckcard_ids.Add(pos, new List<List<string>>());// for current lobby
             for (int p = 0; p < playersOfRound.Count; p++)
             {
                 deckcard_ids[pos].Add(new List<string>());// for every player a list of ids
 
                 for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
                 {
-                    deckcard_ids[pos][p].Add(playersOfRound[p].Deck.Cards[c].Id);
                     deckcard_ids[pos][p].Add(playersOfRound[p].Deck.Cards[c].Id);
                 }
             }
@@ -420,13 +471,20 @@ namespace Server.Server.Requests
                 if (status == p)
                 {
                     playersOfRound[p].Wins++;
+                    playersOfRound[p].ELO += 3;
 
                 }
                 else
                 {
                     playersOfRound[p].Loses++;
+                    playersOfRound[p].ELO -= 5;
                 }
 
+                playersOfRound[p].Matches++;
+                //player update
+                ChangeStatsOfPlayer(playersOfRound[p]);
+
+                //cards update
                 for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
                 {
                     if (!deckcard_ids[posinLobby][p].Contains(playersOfRound[p].Deck.Cards[c].Id))
@@ -434,10 +492,32 @@ namespace Server.Server.Requests
                         ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
                     }
                 }
+
             }
         }
 
+        public void ChangeStatsOfPlayer(User user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
 
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "UPDATE users SET wins = @wins, loses = @loses, matches = @matches, elo = @elo WHERE id = @user_id;";
+
+            command.CommandText = query;
+
+            // parameters
+            AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+            AddParameterWithValue(command, "@wins", DbType.Int32, user.Wins);
+            AddParameterWithValue(command, "@loses", DbType.Int32, user.Loses);
+            AddParameterWithValue(command, "@elo", DbType.Int32, user.ELO);
+            AddParameterWithValue(command, "@matches", DbType.Int32, user.Matches);
+
+            command.ExecuteNonQuery();
+        }
 
         public void ChangeCardToPlayer(string card_id, int user_id)
         {

@@ -24,6 +24,7 @@ namespace Server.Server
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
+            int responseCode = 200;
 
             Console.WriteLine(fullinfo);
 
@@ -54,22 +55,29 @@ namespace Server.Server
                         else
                         {
                             responseHTML += "\n UNABLE to Show cards, No Cards in Account";
+                            responseCode = 500;
                         }
                     }
                     else
                     {
                         responseHTML += "\n Error While trying to read cards";
+                        responseCode = 400;
                     }
                 }
                 else
                 {
                     responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
                 }
+            }
+            else
+            {
+                responseCode = 400;
             }
 
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
         public int CheckIfUserHasCards(UserEndpoint user)
@@ -244,6 +252,7 @@ namespace Server.Server
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
+            int responseCode = 200;
 
             Console.WriteLine(fullinfo);
 
@@ -276,11 +285,13 @@ namespace Server.Server
                     else
                     {
                         responseHTML += "\n UNABLE to DeeckShow cards, No Cards in Account";
+                        responseCode = 500;
                     }
                 }
                 else
                 {
                     responseHTML += "\n Error While trying to read cards";
+                    responseCode = 400;
                 }
             }
             else if (requesttype == "PUT")
@@ -336,17 +347,23 @@ namespace Server.Server
                     else
                     {
                         responseHTML += "\n UNABLE to read Deck cards, No Cards in Account";
+                        responseCode = 500;
                     }
                 }
                 else
                 {
                     responseHTML += "\n Error While trying to read Deckcards";
+                    responseCode = 400;
                 }
+            }
+            else
+            {
+                responseCode = 400;
             }
 
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
         public List<string> GetAllDeckIds(UserEndpoint user)
@@ -434,6 +451,7 @@ namespace Server.Server
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
+            int responseCode = 200;
 
             Console.WriteLine(fullinfo);
 
@@ -441,7 +459,6 @@ namespace Server.Server
             responseHTML += $"<h1> {requesttype} User Deck Request </h1>";
             responseHTML += "\n FullBody: " + fullinfo;
             responseHTML += "\n Token: " + token;
-
 
 
             if (requesttype == "GET")
@@ -466,17 +483,20 @@ namespace Server.Server
                     else
                     {
                         responseHTML += "\n UNABLE to DeeckShow cards, No Cards in Account";
+                        responseCode = 500;
                     }
                 }
                 else
                 {
                     responseHTML += "\n Error While trying to read cards";
+                    responseCode = 400;
                 }
             }
+            else
+                responseCode = 400;
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
-
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
 

@@ -23,6 +23,7 @@ namespace Server.Server.Requests
             string description = $"General User {requesttype}";
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
+            int responseCode = 200;
 
             Console.WriteLine(fullinfo);
             UserEndpoint userToEndpoint = JsonSerializer.Deserialize<UserEndpoint>(fullinfo);
@@ -33,10 +34,7 @@ namespace Server.Server.Requests
             responseHTML += "\n FullBody: " + userInfo?["body"];
 
 
-            if (requesttype == "GET")
-            {
-            }
-            else if (requesttype == "POST")
+            if (requesttype == "POST")
             {
                 if (SeeIfUserIsINDB(userToEndpoint.Username) == false) // if user isnt already registered
                 {
@@ -50,14 +48,16 @@ namespace Server.Server.Requests
                 else
                 {
                     responseHTML += "\n Username is UNAVAILABLE";
+                    responseCode = 400;
                 }
             }
-            else if (requesttype == "DEL")
+            else 
             {
+                responseCode = 400;
             }
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
         public async Task UserSpecificRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
@@ -68,6 +68,7 @@ namespace Server.Server.Requests
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
             string subpath_user = userInfo?["subpath"];
+            int responseCode = 200;
             Console.WriteLine(fullinfo);
 
             responseHTML += "<html> <body> \n";
@@ -142,15 +143,20 @@ namespace Server.Server.Requests
                         responseHTML += "\n } \n}";
                     }
                 }
+                else
+                {
+                    responseCode = 400;
+                }
 
 
             }
             else
             {
                 responseHTML += "\n Couldnt find User by token";
+                responseCode = 400;
             }
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
 
         }
 
@@ -303,7 +309,7 @@ namespace Server.Server.Requests
                     Wins = (int)reader["wins"],
                     Loses = (int)reader["loses"],
                     Elo = (int)reader["elo"],
-                    Matches = (int)reader["matches"],
+                    Matches = (int)reader["matches"]
 
                 };
 
@@ -339,7 +345,7 @@ namespace Server.Server.Requests
             string responseHTML = "";
             string fullinfo = userInfo?["body"];
             string token = userInfo?["token"];
-
+            int responseCode = 200;
             Console.WriteLine(fullinfo);
 
             responseHTML += "<html> <body> \n";
@@ -359,28 +365,42 @@ namespace Server.Server.Requests
                     int matches = user.Wins + user.Loses;
                     float win_perc = 0;
                     float lose_perc = 0;
+                    float drawchance = 0;
+                    float deciededmatches = 0;
                     if (matches > 0)
                     {
                         win_perc = ((float)user.Wins / (float)matches) * 100;
                         lose_perc = ((float)user.Loses / (float)matches) * 100;
+                        deciededmatches = user.Loses + user.Wins;
+                        deciededmatches = (float)user.Matches - deciededmatches;
+                        drawchance = ((deciededmatches) / (float)user.Matches)*100;
+                        
                     }
 
                     responseHTML += $"\nWins: {user.Wins}";
                     responseHTML += $"\nLoses: {user.Loses}";
+                    responseHTML += $"\nDraws: {deciededmatches}";
 
                     responseHTML += $"\nWinChance: {win_perc }%";
                     responseHTML += $"\nLoseChance: {lose_perc}%";
+                    responseHTML += $"\nDrawChance: {drawchance}%";
                     responseHTML += $"\nMatches Played: {matches}";
+                    responseHTML += $"\nELO: {user.Elo}";
                 }
                 else
                 {
                     responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
                 }
+            }
+            else
+            {
+                responseCode = 400;
             }
 
 
             responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, 200, description, responseHTML);
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
 
