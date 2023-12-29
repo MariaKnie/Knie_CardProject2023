@@ -135,11 +135,15 @@ namespace Server.Server.Requests
                         bool canchange = true;
                         if (InfoToChange_Dic.ContainsKey("Username"))
                         {
-                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["Username"]);
+                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["Username"]);                      
                         }
                         if (canchange)
                         {
                             ChangeUserData(user, InfoToChange_Dic);
+                        }
+                        else
+                        {
+                            responseHTML += "Username is already taken";
                         }
 
                     }
