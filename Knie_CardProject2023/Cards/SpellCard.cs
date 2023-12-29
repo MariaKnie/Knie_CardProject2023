@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Knie_CardProject2023.Enums.Card_Enums;
 
 namespace Knie_CardProject2023
 {
@@ -38,23 +39,23 @@ namespace Knie_CardProject2023
             if (num == 0)
             {
                 //Water
-                newCard.name = "WaterSpell";
+                newCard.name = Enum_ElementType.Water.ToString() + newCard.CardType;
                 newCard.damage = 40;
-                newCard.element_type = "Water";
+                newCard.element_type = Enum_ElementType.Water.ToString();
             }
             else if (num == 1)
             {
                 //Fire
-                newCard.name = "FireSpell";
+                newCard.name = Enum_ElementType.Fire.ToString() + newCard.CardType;
                 newCard.damage = 90;
-                newCard.element_type = "Fire";
+                newCard.element_type = Enum_ElementType.Fire.ToString();
             }
             else if (num == 2)
             {
                 //Normal
-                newCard.name = "NormalSpell";
+                newCard.name = Enum_ElementType.Normal.ToString() + newCard.CardType;
                 newCard.damage = 30;
-                newCard.element_type = "Normal";
+                newCard.element_type = Enum_ElementType.Normal.ToString();
             }
             
 
