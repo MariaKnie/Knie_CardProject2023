@@ -33,7 +33,8 @@ namespace Knie_CardProject2023
         public override Monstercard GenerateCard()
         {
             Random rnd = new Random();
-            int num = rnd.Next(7);
+            int enumCount = Enum.GetNames(typeof(Enum_Monster)).Length;
+            int num = rnd.Next(enumCount);
 
             Monstercard newCard = new Monstercard();
             newCard.CardType = "Monster";

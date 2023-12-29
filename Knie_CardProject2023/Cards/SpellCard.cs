@@ -32,7 +32,8 @@ namespace Knie_CardProject2023
         {
 
             Random rnd = new Random();
-            int num = rnd.Next(3);
+            int enumCount = Enum.GetNames(typeof(Enum_ElementType)).Length;
+            int num = rnd.Next(enumCount);
 
             SpellCard newCard = new SpellCard();
             newCard.CardType = "Spell";
