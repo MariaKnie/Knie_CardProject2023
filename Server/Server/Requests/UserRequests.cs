@@ -367,7 +367,7 @@ namespace Server.Server.Requests
                     float lose_perc = 0;
                     float drawchance = 0;
                     float deciededmatches = 0;
-                    if (matches > 0)
+                    if (matches > 0) // to avoid math exeptions
                     {
                         win_perc = ((float)user.Wins / (float)matches) * 100;
                         lose_perc = ((float)user.Loses / (float)matches) * 100;
