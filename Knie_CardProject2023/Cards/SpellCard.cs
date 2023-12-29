@@ -32,33 +32,39 @@ namespace Knie_CardProject2023
         {
 
             Random rnd = new Random();
-            int enumCount = Enum.GetNames(typeof(Enum_ElementType)).Length;
+            int enumCount = Enum.GetNames(typeof(Enum_ElementTypes)).Length;
             int num = rnd.Next(enumCount);
 
             SpellCard newCard = new SpellCard();
-            newCard.CardType = "Spell";
+            newCard.CardType = Enum_CardTypes.Spell.ToString();
             if (num == 0)
             {
                 //Water
-                newCard.name = Enum_ElementType.Water.ToString() + newCard.CardType;
+                newCard.name = Enum_ElementTypes.Water.ToString() + newCard.CardType;
                 newCard.damage = 40;
-                newCard.element_type = Enum_ElementType.Water.ToString();
+                newCard.element_type = Enum_ElementTypes.Water.ToString();
             }
             else if (num == 1)
             {
                 //Fire
-                newCard.name = Enum_ElementType.Fire.ToString() + newCard.CardType;
+                newCard.name = Enum_ElementTypes.Fire.ToString() + newCard.CardType;
                 newCard.damage = 90;
-                newCard.element_type = Enum_ElementType.Fire.ToString();
+                newCard.element_type = Enum_ElementTypes.Fire.ToString();
             }
             else if (num == 2)
             {
                 //Normal
-                newCard.name = Enum_ElementType.Normal.ToString() + newCard.CardType;
+                newCard.name = Enum_ElementTypes.Normal.ToString() + newCard.CardType;
                 newCard.damage = 30;
-                newCard.element_type = Enum_ElementType.Normal.ToString();
+                newCard.element_type = Enum_ElementTypes.Normal.ToString();
             }
-            
+            else if (num == 3)
+            {
+                //Normal
+                newCard.name = Enum_ElementTypes.Electro.ToString() + newCard.CardType;
+                newCard.damage = 30;
+                newCard.element_type = Enum_ElementTypes.Electro.ToString();
+            }
 
 
             Console.WriteLine($" Added Spell-Card: \n  Name: {newCard.name}\n  Damage: {newCard.damage}\n  Element: {newCard.element_type}");

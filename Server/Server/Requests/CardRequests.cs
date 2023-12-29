@@ -309,7 +309,14 @@ namespace Server.Server
                 try
                 {
                     string[] parts1 = temp.Split(",");
-                    for (int i = 0; i < 5; i++)
+                    if (parts1.Length != 4 ) // wrong count
+                    {
+                        responseHTML += "Deck needs to be exactly 4 cards! You put " + parts1.Length;
+                        responseHTML += "\n</body> </html>";
+                        response.UniqueResponse(writer, 200, description, responseHTML);
+                        return;
+                    }
+                    for (int i = 0; i < 4; i++)
                     {
                         parts1[i] = parts1[i].Trim();
                         parts1[i] = parts1[i].Remove(parts1[i].Length - 1);

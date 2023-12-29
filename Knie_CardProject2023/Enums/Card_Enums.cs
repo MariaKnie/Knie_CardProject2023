@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Knie_CardProject2023.Enums
 {
-    internal class Card_Enums
+    public class Card_Enums
     {
         public enum Enum_Monster
         {
@@ -19,11 +19,18 @@ namespace Knie_CardProject2023.Enums
             FireElve
         }
 
-        public enum Enum_ElementType
+        public enum Enum_ElementTypes
         {
             Fire,
             Normal,
-            Water
+            Water,
+            Electro
+        }
+
+        public enum Enum_CardTypes
+        {
+            Spell,
+            Monster
         }
     }
 }

@@ -37,55 +37,55 @@ namespace Knie_CardProject2023
             int num = rnd.Next(enumCount);
 
             Monstercard newCard = new Monstercard();
-            newCard.CardType = "Monster";
+            newCard.CardType = Enum_CardTypes.Monster.ToString();
             if (num == 0)
             {
                 //Dragon
                 newCard.name = Enum_Monster.Dragon.ToString() ;
                 newCard.damage = 100;
-                newCard.element_type = Enum_ElementType.Fire.ToString();
+                newCard.element_type = Enum_ElementTypes.Fire.ToString();
             }
             else if (num == 1)
             {
                 //Goblins
                 newCard.name = Enum_Monster.Goblin.ToString();
                 newCard.damage = 40;
-                newCard.element_type = Enum_ElementType.Normal.ToString();
+                newCard.element_type = Enum_ElementTypes.Normal.ToString();
             }
             else if (num == 2)
             {
                 //Wizzard
                 newCard.name = Enum_Monster.Wizzard.ToString();
                 newCard.damage = 50;
-                newCard.element_type = Enum_ElementType.Water.ToString();
+                newCard.element_type = Enum_ElementTypes.Water.ToString();
             }
             else if (num == 3)
             {
                 //Orks
                 newCard.name = Enum_Monster.Ork.ToString();
                 newCard.damage = 50;
-                newCard.element_type = Enum_ElementType.Normal.ToString();
+                newCard.element_type = Enum_ElementTypes.Normal.ToString();
             }
             else if (num == 4)
             {
                 //Knights
                 newCard.name = Enum_Monster.Knight.ToString();
                 newCard.damage = 50;
-                newCard.element_type = Enum_ElementType.Normal.ToString();
+                newCard.element_type = Enum_ElementTypes.Normal.ToString();
             }
             else if (num == 5)
             {
                 //Kraken
                 newCard.name = Enum_Monster.Kraken.ToString();
                 newCard.damage = 70;
-                newCard.element_type = Enum_ElementType.Normal.ToString();
+                newCard.element_type = Enum_ElementTypes.Normal.ToString();
             }
             else if (num == 6)
             {
                 //FireElves
                 newCard.name = Enum_Monster.FireElve.ToString();
                 newCard.damage = 20;
-                newCard.element_type = Enum_ElementType.Fire.ToString();
+                newCard.element_type = Enum_ElementTypes.Fire.ToString();
             }
 
             Console.WriteLine($" Added Monster-Card: \n  Name: {newCard.name}\n  Damage: {newCard.damage}\n  Element: {newCard.element_type}"); 

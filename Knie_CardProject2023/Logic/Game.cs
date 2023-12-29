@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static Knie_CardProject2023.Enums.Card_Enums;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Knie_CardProject2023.Logic
@@ -121,17 +122,43 @@ namespace Knie_CardProject2023.Logic
 
                 for (int i = 0; i < cards.Count; i++)
                 {
-                    if (cards[i].ElementType == "Fire")
+                    if (cards[i].ElementType == Enum_ElementTypes.Water.ToString()) //  winner
                     {
-                        if (i < cards.Count - 1 && cards[i + 1].ElementType == "Water")
+                        if (i < cards.Count - 1 && cards[i + 1].ElementType == Enum_ElementTypes.Fire.ToString())
+                        {
+                            effect1 = 2f;
+                            effect2 = 0.5f;
+                        }
+                        else if (i > 0 && cards[i - 1].ElementType == Enum_ElementTypes.Fire.ToString())
                         {
                             effect1 = 0.5f;
                             effect2 = 2f;
                         }
-                        else if (i >0 && cards[i - 1].ElementType == "Water")
+                    }
+                    else if (cards[i].ElementType == Enum_ElementTypes.Electro.ToString()) // winner
+                    {
+                        // electrocuted 
+                        if (i < cards.Count - 1 && cards[i + 1].ElementType == Enum_ElementTypes.Water.ToString())
                         {
                             effect1 = 2f;
-                            effect2 = 0.5f;
+                            effect2 = 0.25f;
+                        }
+                        else if (i > 0 && cards[i - 1].ElementType == Enum_ElementTypes.Water.ToString())
+                        {
+                            effect1 = 0.25f;
+                            effect2 = 2f;
+                        }
+
+                        // Fire explosion
+                        if (i < cards.Count - 1 && cards[i + 1].ElementType == Enum_ElementTypes.Fire.ToString())
+                        {
+                            effect1 = 0.75f;
+                            effect2 = 0.6f;
+                        }
+                        else if (i > 0 && cards[i - 1].ElementType == Enum_ElementTypes.Fire.ToString())
+                        {
+                            effect1 = 0.6f;
+                            effect2 = 0.75f;
                         }
                     }
                 }

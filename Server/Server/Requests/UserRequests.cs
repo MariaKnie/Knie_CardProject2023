@@ -79,7 +79,9 @@ namespace Server.Server.Requests
 
             UserEndpoint user = GetUserByToken(token);
 
-            if (user != null && user.Username == subpath_user)
+            string temptoken = token.Substring(0, token.Length - 10); // if token matches with subpath
+
+            if (user != null && temptoken == subpath_user)  // see if token is used by the right user
             {
 
                 if (requesttype == "GET")
@@ -130,8 +132,15 @@ namespace Server.Server.Requests
                             return;
                         }
 
-
-                        ChangeUserData(user, InfoToChange_Dic);
+                        bool canchange = true;
+                        if (InfoToChange_Dic.ContainsKey("Username"))
+                        {
+                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["Username"]);
+                        }
+                        if (canchange)
+                        {
+                            ChangeUserData(user, InfoToChange_Dic);
+                        }
 
                     }
                     else // get user data
@@ -238,7 +247,7 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "INSERT INTO users (username, password) VALUES (@username, @password)";
+            string query = "INSERT INTO users (username, password, coins) VALUES (@username, @password, @coins)";
             command.CommandText = query;
 
             // parameters
@@ -248,6 +257,7 @@ namespace Server.Server.Requests
             //AddParameterWithValue(command, "@id", DbType.String, id);
             GeneralRequests.AddParameterWithValue(command, "@username", DbType.String, user.Username);
             GeneralRequests.AddParameterWithValue(command, "@password", DbType.String, user.Password);
+            GeneralRequests.AddParameterWithValue(command, "@coins", DbType.Int32, 20);
 
 
 

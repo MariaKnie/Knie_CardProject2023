@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Knie_CardProject2023.Enums.Card_Enums;
 
 namespace MTSCG_TEST
 {
@@ -50,8 +51,8 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 15;
             spell_Card_2.Damage = 10;
-            spell_Card_1.ElementType = "Fire";
-            spell_Card_2.ElementType = "Fire";
+            spell_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -82,8 +83,8 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 10;
             spell_Card_2.Damage = 15;
-            spell_Card_1.ElementType = "Fire";
-            spell_Card_2.ElementType = "Fire";
+            spell_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -114,8 +115,8 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 10;
             spell_Card_2.Damage = 10;
-            spell_Card_1.ElementType = "Fire";
-            spell_Card_2.ElementType = "Fire";
+            spell_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -147,8 +148,8 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 15;
             spell_Card_2.Damage = 10;
-            spell_Card_1.ElementType = "Fire";
-            spell_Card_2.ElementType = "Fire";
+            spell_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -180,8 +181,8 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 15;
             spell_Card_2.Damage = 10;
-            spell_Card_1.ElementType = "Fire";
-            spell_Card_2.ElementType = "Fire";
+            spell_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -215,10 +216,10 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 10;
             spell_Card_2.Damage = 10;
-            spell_Card_1.ElementType = "Fire";
-            spell_Card_2.ElementType = "Water";
-            spell_Card_1.CardType = "Spell";
-            spell_Card_2.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -249,10 +250,10 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 5;
             spell_Card_2.Damage = 20;
-            spell_Card_1.ElementType = "Water";
-            spell_Card_2.ElementType = "Fire";
-            spell_Card_1.CardType = "Spell";
-            spell_Card_2.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -283,10 +284,10 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 5;
             spell_Card_2.Damage = 26;
-            spell_Card_1.ElementType = "Water";
-            spell_Card_2.ElementType = "Fire";
-            spell_Card_1.CardType = "Spell";
-            spell_Card_2.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -309,7 +310,40 @@ namespace MTSCG_TEST
             Assert.Pass();
             //Assert.Fail();
         }
-     
+
+        [Test]
+        public void Test_Spell_ElectroWater()
+        {
+            // Pattern AAA
+            // Arrange
+            spell_Card_1.Damage = 20;
+            spell_Card_2.Damage = 20;
+            spell_Card_1.ElementType = Enum_ElementTypes.Electro.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
+
+            max.Deck.Cards.Clear();
+            tom.Deck.Cards.Clear();
+
+            max.Deck.Cards.Add(spell_Card_1);
+            tom.Deck.Cards.Add(spell_Card_2);
+
+            List<User> players = new List<User>();
+            players.Add(max);
+            players.Add(tom);
+
+            //Act
+            int expectedValue = 0;
+            int actualValue = Game.CompareCards(players, 0);
+
+            Console.WriteLine(actualValue);
+
+            //Assert
+            Assert.AreEqual(expectedValue, actualValue);
+            Assert.Pass();
+            //Assert.Fail();
+        }
 
         //######################## Monster Cards
 
@@ -320,8 +354,8 @@ namespace MTSCG_TEST
             // Arrange
             monster_Card_1.Damage = 15;
             monster_Card_2.Damage = 10;
-            monster_Card_1.ElementType = "Fire";
-            monster_Card_2.ElementType = "Fire";
+            monster_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -352,8 +386,8 @@ namespace MTSCG_TEST
             // Arrange
             monster_Card_1.Damage = 10;
             monster_Card_2.Damage = 15;
-            monster_Card_1.ElementType = "Fire";
-            monster_Card_2.ElementType = "Fire";
+            monster_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -384,8 +418,8 @@ namespace MTSCG_TEST
             // Arrange
             monster_Card_1.Damage = 10;
             monster_Card_2.Damage = 10;
-            monster_Card_1.ElementType = "Fire";
-            monster_Card_2.ElementType = "Fire";
+            monster_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -416,8 +450,8 @@ namespace MTSCG_TEST
             // Arrange
             monster_Card_1.Damage = 15;
             monster_Card_2.Damage = 10;
-            monster_Card_1.ElementType = "Fire";
-            monster_Card_2.ElementType = "Fire";
+            monster_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -448,8 +482,8 @@ namespace MTSCG_TEST
             // Arrange
             monster_Card_1.Damage = 15;
             monster_Card_2.Damage = 10;
-            monster_Card_1.ElementType = "Fire";
-            monster_Card_2.ElementType = "Fire";
+            monster_Card_1.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
 
             max.Deck.Cards.Clear();
             tom.Deck.Cards.Clear();
@@ -479,16 +513,16 @@ namespace MTSCG_TEST
 
  // ################## effect calculation
         [Test]
-        public void Test_Spell_effect_calculation()
+        public void Test_Spell_effect_calculation_WaterFire()
         {
             // Pattern AAA
             // Arrange
             spell_Card_1.Damage = 5;
             spell_Card_2.Damage = 20;
-            spell_Card_1.ElementType = "Water";
-            spell_Card_2.ElementType = "Fire";
-            spell_Card_1.CardType = "Spell";
-            spell_Card_2.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
             float ef1 = 1f;
             float ef2 = 1f;
 
@@ -518,10 +552,10 @@ namespace MTSCG_TEST
             // Arrange
             spell_Card_1.Damage = 5;
             spell_Card_2.Damage = 20;
-            spell_Card_1.ElementType = "Water";
-            spell_Card_2.ElementType = "Water";
-            spell_Card_1.CardType = "Spell";
-            spell_Card_2.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
             float ef1 = 1f;
             float ef2 = 1f;
 
@@ -545,20 +579,89 @@ namespace MTSCG_TEST
         }
 
 
+
+        [Test]
+        public void Test_Spell_effect_calculation_ElectroWater()
+        {
+            // Pattern AAA
+            // Arrange
+            spell_Card_1.Damage = 5;
+            spell_Card_2.Damage = 20;
+            spell_Card_1.ElementType = Enum_ElementTypes.Electro.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
+            float ef1 = 1f;
+            float ef2 = 1f;
+
+            List<Card> cards = new List<Card>();
+            cards.Add(spell_Card_1);
+            cards.Add(spell_Card_2);
+
+            Game.CheckEffect(cards, ref ef1, ref ef2);
+            //Act
+            float expectedValue1 = 2f;
+            float expectedValue2 = 0.25f;
+
+            Console.WriteLine(ef1);
+            Console.WriteLine(ef2);
+
+            //Assert
+            Assert.AreEqual(expectedValue1, ef1);
+            Assert.AreEqual(expectedValue2, ef2);
+            Assert.Pass();
+            //Assert.Fail();
+        }
+        [Test]
+        public void Test_Spell_effect_calculation_ElectroFire()
+        {
+            // Pattern AAA
+            // Arrange
+            spell_Card_1.Damage = 5;
+            spell_Card_2.Damage = 20;
+            spell_Card_1.ElementType = Enum_ElementTypes.Electro.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
+            float ef1 = 1f;
+            float ef2 = 1f;
+
+            List<Card> cards = new List<Card>();
+            cards.Add(spell_Card_1);
+            cards.Add(spell_Card_2);
+
+            Game.CheckEffect(cards, ref ef1, ref ef2);
+            //Act
+            float expectedValue1 = 0.75f;
+            float expectedValue2 = 0.6f;
+
+            Console.WriteLine(ef1);
+            Console.WriteLine(ef2);
+
+            //Assert
+            Assert.AreEqual(expectedValue1, ef1);
+            Assert.AreEqual(expectedValue2, ef2);
+            Assert.Pass();
+            //Assert.Fail();
+        }
+
+
+        // Specialties
+
         [Test]
         public void Test_Speciality_Goblin_Dragon()
         {
             // Pattern AAA
             // Arrange
-            monster_Card_1.Name = "Goblin";
+            monster_Card_1.Name = Enum_Monster.Goblin.ToString();
             monster_Card_1.Damage = 20;
-            monster_Card_1.ElementType = "Water";
-            monster_Card_1.CardType = "Monster";
+            monster_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            monster_Card_1.CardType = Enum_CardTypes.Monster.ToString();
 
-            monster_Card_2.Name = "Dragon";
+            monster_Card_2.Name = Enum_Monster.Dragon.ToString();
             monster_Card_2.Damage = 20;
-            monster_Card_2.ElementType = "Fire";
-            monster_Card_2.CardType = "Monster";
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.CardType = Enum_CardTypes.Monster.ToString();
 
             float ef1 = 1f;
             float ef2 = 1f;
@@ -587,15 +690,15 @@ namespace MTSCG_TEST
         {
             // Pattern AAA
             // Arrange
-            monster_Card_1.Name = "Ork";
+            monster_Card_1.Name = Enum_Monster.Ork.ToString(); 
             monster_Card_1.Damage = 20;
-            monster_Card_1.ElementType = "Water";
-            monster_Card_1.CardType = "Monster";
+            monster_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            monster_Card_1.CardType = Enum_CardTypes.Monster.ToString();
 
-            monster_Card_2.Name = "Wizzard";
+            monster_Card_2.Name = Enum_Monster.Wizzard.ToString();
             monster_Card_2.Damage = 20;
-            monster_Card_2.ElementType = "Fire";
-            monster_Card_2.CardType = "Monster";
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.CardType = Enum_CardTypes.Monster.ToString();
 
             float ef1 = 1f;
             float ef2 = 1f;
@@ -624,15 +727,15 @@ namespace MTSCG_TEST
         {
             // Pattern AAA
             // Arrange
-            spell_Card_1.Name = "WaterSpell";
+            spell_Card_1.Name = Enum_ElementTypes.Water.ToString() + Enum_CardTypes.Spell.ToString();
             spell_Card_1.Damage = 20;
-            spell_Card_1.ElementType = "Water";
-            spell_Card_1.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
 
-            monster_Card_2.Name = "Knights";
+            monster_Card_2.Name = Enum_Monster.Knight.ToString();
             monster_Card_2.Damage = 20;
-            monster_Card_2.ElementType = "Fire";
-            monster_Card_2.CardType = "Monster";
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.CardType = Enum_CardTypes.Monster.ToString();
 
             float ef1 = 1f;
             float ef2 = 1f;
@@ -661,15 +764,15 @@ namespace MTSCG_TEST
         {
             // Pattern AAA
             // Arrange
-            spell_Card_1.Name = "WaterSpell";
+            spell_Card_1.Name = Enum_ElementTypes.Water.ToString() + Enum_CardTypes.Spell.ToString();
             spell_Card_1.Damage = 20;
-            spell_Card_1.ElementType = "Water";
-            spell_Card_1.CardType = "Spell";
+            spell_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
 
-            monster_Card_2.Name = "Kraken";
+            monster_Card_2.Name = Enum_Monster.Kraken.ToString();
             monster_Card_2.Damage = 20;
-            monster_Card_2.ElementType = "Fire";
-            monster_Card_2.CardType = "Monster";
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.CardType = Enum_CardTypes.Monster.ToString();
 
             float ef1 = 1f;
             float ef2 = 1f;
@@ -698,15 +801,15 @@ namespace MTSCG_TEST
         {
             // Pattern AAA
             // Arrange
-            monster_Card_1.Name = "Dragon";
+            monster_Card_1.Name = Enum_Monster.Dragon.ToString();
             monster_Card_1.Damage = 20;
-            monster_Card_1.ElementType = "Water";
-            monster_Card_1.CardType = "Monster";
+            monster_Card_1.ElementType = Enum_ElementTypes.Water.ToString();
+            monster_Card_1.CardType = Enum_CardTypes.Monster.ToString();
 
-            monster_Card_2.Name = "FireElve";
+            monster_Card_2.Name = Enum_Monster.FireElve.ToString();
             monster_Card_2.Damage = 20;
-            monster_Card_2.ElementType = "Fire";
-            monster_Card_2.CardType = "Monster";
+            monster_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            monster_Card_2.CardType = Enum_CardTypes.Monster.ToString();
 
             float ef1 = 1f;
             float ef2 = 1f;

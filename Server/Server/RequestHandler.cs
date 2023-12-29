@@ -80,6 +80,7 @@ namespace Knie_CardProject2023.Server
             headers.Add("/sessions", () => general.SessionRequest(writer, Http_type, userInfo));
             headers.Add("/stats", () => users.StatsRequest(writer, Http_type, userInfo));
             headers.Add("/scoreboard", () => general.ScoreboardRequest(writer, Http_type, userInfo));
+            headers.Add("/scoreboardWins", () => general.ScoreboardRequest_Wins(writer, Http_type, userInfo));
             headers.Add("/battles", () => general.BattleRequest(writer, Http_type, userInfo));
 
             headers.Add("/transactions", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo));

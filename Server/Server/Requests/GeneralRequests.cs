@@ -221,6 +221,79 @@ namespace Server.Server.Requests
 
             // command
             using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT username, elo FROM users ORDER BY elo DESC;";
+            command.CommandText = query;
+
+
+            using IDataReader reader = command.ExecuteReader();
+            int count = 0;
+            string jsonToSendBack = "\nUser Score Board\n";
+            while (reader.Read())
+            {
+                count++;
+                UserEndpoint user_Read = new()
+                {
+                    Username = (string)reader["username"],
+                    Elo = (int)reader["elo"]
+                };
+
+                jsonToSendBack += $"\nPlace: {count}, User: {user_Read.Username}, Elo: {user_Read.Elo}";
+
+            }
+
+            return jsonToSendBack;
+        }
+        public async Task ScoreboardRequest_Wins(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"Scoreboard Request{requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
+
+            int responseCode = 200;
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} Scoreboard Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "GET")
+            {
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                if (user != null)
+                {
+
+                    responseHTML += $"\nGetting Scoreboard \n";
+                    responseHTML += GetPlayerScoreboard_Wins(user);
+                }
+                else
+                {
+                    responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
+                }
+            }
+            else
+                responseCode = 400;
+
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
+        }
+        public string GetPlayerScoreboard_Wins(UserEndpoint user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
             string query = "SELECT username, wins FROM users ORDER BY wins DESC;";
             command.CommandText = query;
 
@@ -243,7 +316,6 @@ namespace Server.Server.Requests
 
             return jsonToSendBack;
         }
-
 
         public static Dictionary<int, List<User>> playerLobbylist = new Dictionary<int, List<User>>();
         public static Dictionary<int, List<List<string>>> deckcard_ids = new Dictionary<int, List<List<string>>>();
