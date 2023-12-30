@@ -73,7 +73,263 @@ namespace Server.Server.Requests
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
+        public async Task ScoreboardRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"Scoreboard Request{requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
 
+            int responseCode = 200;
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} Scoreboard Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "GET")
+            {
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                if (user != null)
+                {
+
+                    responseHTML += $"\nGetting Scoreboard \n";
+                    responseHTML += GetPlayerScoreboard(user);
+                }
+                else
+                {
+                    responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
+                }
+            }
+            else
+                responseCode = 400;
+
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
+        }
+        public async Task ScoreboardRequest_Wins(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"Scoreboard Request{requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
+
+            int responseCode = 200;
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} Scoreboard Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "GET")
+            {
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                if (user != null)
+                {
+
+                    responseHTML += $"\nGetting Scoreboard \n";
+                    responseHTML += GetPlayerScoreboard_Wins(user);
+                }
+                else
+                {
+                    responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
+                }
+            }
+            else
+                responseCode = 400;
+
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
+        }
+
+        public static Dictionary<int, List<User>> playerLobbylist = new Dictionary<int, List<User>>();
+        public static Dictionary<int, List<List<string>>> deckcard_ids = new Dictionary<int, List<List<string>>>();
+        public static Dictionary<int, Dictionary<string, string>> GameLog = new Dictionary<int, Dictionary<string, string>>();
+        static int currentLobbycount = 0;
+        static Mutex mutex_Playerlist = new Mutex();
+        static Mutex mutex_GameLog = new Mutex();
+        static Mutex mutex_Deckids = new Mutex();
+        // would need a mutex list for better performance;
+        public async Task BattleRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"Battle Request {requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
+
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} Battle Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+            bool battle = false;
+            int posinPlayList = 0;
+
+            int responseCode = 200;
+
+            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
+
+            if (requesttype == "GET")
+            {
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id, user.Matches, user.Elo);
+                if (user != null)
+                {
+                    responseHTML += "\n Checking Deck";
+
+                    CardRequests cardRQ = new CardRequests();
+                    bool playAble = cardRQ.CheckEnoughDeckCards(user);
+
+                    if (!playAble)
+                    {
+                        responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
+                        responseHTML += "\n</body> </html>";
+                        response.UniqueResponse(writer, 400, description, responseHTML);
+                        return;
+                    }
+                    responseHTML += "\n Looking for Game Lobby";
+                    bool foundSpot = false;
+
+                    List<Card> PlayerDeck = new List<Card>();
+                    ur.GetUserDeckCards(ref Carduser);
+
+                    mutex_Playerlist.WaitOne();
+                    for (int i = 0; i < playerLobbylist.Count; i++)
+                    {
+                        if (playerLobbylist.ElementAt(i).Value.Count() == 1) // found free spot
+                        {
+                            foundSpot = true;
+                            posinPlayList = playerLobbylist.ElementAt(i).Key; // get lobby number
+                            playerLobbylist[posinPlayList].Add(Carduser); // add user
+
+                            responseHTML += "\n Found Spot!";
+                            Console.WriteLine("Found Spot!");
+
+                            if (playerLobbylist[posinPlayList].Count() == 2)  // can play
+                            {
+                                battle = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!foundSpot) // No spots open
+                    {
+                        foundSpot = true;
+                        posinPlayList = currentLobbycount++; // new lobby count
+
+                        playerLobbylist.Add(posinPlayList, new List<User>()); // open lobby
+                        playerLobbylist[posinPlayList].Add(Carduser); // add user
+
+                        GameLog.Add(posinPlayList, new Dictionary<string, string>()); // open log
+                        GameLog[posinPlayList].Add("Battle", "null"); // add log
+
+                        responseHTML += "\n Single Player, Waiting for Players";
+                        Console.WriteLine("Single Player");
+                    }
+                    mutex_Playerlist.ReleaseMutex();
+
+                    if (battle) // start battle, last player to join stats battle
+                    {
+                        List<User> playersOfRound = playerLobbylist[posinPlayList]; // get user in lobby
+                        GetPlayers_DecksIDs(playersOfRound, posinPlayList); // get Player card ids
+
+                        responseHTML += "\n Battle Begin!";
+                        int status = Game.GameLoop(playersOfRound, 0); // Actual Battle
+
+                        if (status < 0) // Game return status, errorcodes
+                        {
+                            if (status == -1) // draw
+                            {
+                                GameLog[posinPlayList].Add("Log", $"\nDraw!");
+                                UserRequests useRq = new UserRequests();
+
+                                for (int i = 0; i < playersOfRound.Count; i++)
+                                {
+                                    playersOfRound[i].Matches++;
+                                    useRq.ChangeUserStats(playersOfRound[i]);
+                                }
+                            }
+                        }
+                        else // there is a winner
+                        {
+                            Console.WriteLine($"STATUS {status}!");
+                            Console.WriteLine($"Player {playersOfRound[status].Username} Won!");
+
+                            GameLog[posinPlayList].Add("Log", $"\nPlayer {playersOfRound[status].Username} Won!");
+                            UpdatePlayers_Stack_Stats(playersOfRound, status, posinPlayList); // update cards and user stats
+                        }
+
+                        GameLog[posinPlayList]["Battle"] = "done"; // cue for first player
+                    }
+
+                    while (GameLog[posinPlayList]["Battle"] != "done") //waiting for second player
+                    {
+                        //Console.WriteLine("\n Waiting for Player");
+                    }
+                    responseHTML += GameLog[posinPlayList]["Log"]; // players get battle log
+                }
+                else
+                {
+                    responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
+                }
+            }
+            else
+                responseCode = 400;
+
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
+
+            // Clear list and close lobby
+            mutex_Playerlist.WaitOne();
+            mutex_Deckids.WaitOne();
+            mutex_GameLog.WaitOne();
+            if (GameLog[posinPlayList].ContainsKey("Ended"))
+            {
+                GameLog[posinPlayList]["Ended"] = "2";
+
+                // clear
+                playerLobbylist[posinPlayList].Clear();
+                GameLog[posinPlayList].Clear();
+                deckcard_ids[posinPlayList].Clear();
+
+                // remove
+                playerLobbylist.Remove(posinPlayList);
+                GameLog.Remove(posinPlayList);
+                deckcard_ids.Remove(posinPlayList);
+            }
+            else
+            {
+                GameLog[posinPlayList].Add("Ended", "1");
+            }
+            mutex_Playerlist.ReleaseMutex();
+            mutex_Deckids.ReleaseMutex();
+            mutex_GameLog.ReleaseMutex();
+
+            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
+        }
 
         int UserLoginDataCheck(UserEndpoint user)
         {
@@ -132,7 +388,6 @@ namespace Server.Server.Requests
             Console.WriteLine("User token already active");
             return true;
         }
-
         public void AddTokenForUser(int id, UserEndpoint user)
         {
             // Connection
@@ -153,7 +408,6 @@ namespace Server.Server.Requests
 
             command.ExecuteNonQuery();
         }
-
         public void DeleteTokens()
         {
             // Connection
@@ -169,49 +423,6 @@ namespace Server.Server.Requests
             command.ExecuteNonQuery();
         }
 
-
-        public async Task ScoreboardRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
-        {
-            HTTP_Response response = new HTTP_Response();
-            string description = $"Scoreboard Request{requesttype}";
-            string responseHTML = "";
-            string fullinfo = userInfo?["body"];
-            string token = userInfo?["token"];
-
-            int responseCode = 200;
-            Console.WriteLine(fullinfo);
-
-            responseHTML += "<html> <body> \n";
-            responseHTML += $"<h1> {requesttype} Scoreboard Request </h1>";
-            responseHTML += "\n FullBody: " + fullinfo;
-            responseHTML += "\n Token: " + token;
-
-
-
-            if (requesttype == "GET")
-            {
-                UserRequests ur = new UserRequests();
-                UserEndpoint user = ur.GetUserByToken(token);
-
-                if (user != null)
-                {
-
-                    responseHTML += $"\nGetting Scoreboard \n";
-                    responseHTML += GetPlayerScoreboard(user);
-                }
-                else
-                {
-                    responseHTML += "\n Couldnt find User by token";
-                    responseCode = 400;
-                }
-            }
-            else
-                responseCode = 400;
-
-
-            responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, responseCode, description, responseHTML);
-        }
         public string GetPlayerScoreboard(UserEndpoint user)
         {
             // Connection
@@ -242,48 +453,6 @@ namespace Server.Server.Requests
             }
 
             return jsonToSendBack;
-        }
-        public async Task ScoreboardRequest_Wins(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
-        {
-            HTTP_Response response = new HTTP_Response();
-            string description = $"Scoreboard Request{requesttype}";
-            string responseHTML = "";
-            string fullinfo = userInfo?["body"];
-            string token = userInfo?["token"];
-
-            int responseCode = 200;
-            Console.WriteLine(fullinfo);
-
-            responseHTML += "<html> <body> \n";
-            responseHTML += $"<h1> {requesttype} Scoreboard Request </h1>";
-            responseHTML += "\n FullBody: " + fullinfo;
-            responseHTML += "\n Token: " + token;
-
-
-
-            if (requesttype == "GET")
-            {
-                UserRequests ur = new UserRequests();
-                UserEndpoint user = ur.GetUserByToken(token);
-
-                if (user != null)
-                {
-
-                    responseHTML += $"\nGetting Scoreboard \n";
-                    responseHTML += GetPlayerScoreboard_Wins(user);
-                }
-                else
-                {
-                    responseHTML += "\n Couldnt find User by token";
-                    responseCode = 400;
-                }
-            }
-            else
-                responseCode = 400;
-
-
-            responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
         public string GetPlayerScoreboard_Wins(UserEndpoint user)
         {
@@ -317,216 +486,7 @@ namespace Server.Server.Requests
             return jsonToSendBack;
         }
 
-        public static Dictionary<int, List<User>> playerLobbylist = new Dictionary<int, List<User>>();
-        public static Dictionary<int, List<List<string>>> deckcard_ids = new Dictionary<int, List<List<string>>>();
-        public static Dictionary<int, Dictionary<string, string>> GameLog = new Dictionary<int, Dictionary<string, string>>();
-        static int currentLobbycount = 0;
-        static Mutex mutex_Playerlist = new Mutex();
-        static Mutex mutex_GameLog = new Mutex();
-        static Mutex mutex_Deckids = new Mutex();
-        // would need a mutex list for better performance;
-        public async Task BattleRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
-        {
-            HTTP_Response response = new HTTP_Response();
-            string description = $"Battle Request {requesttype}";
-            string responseHTML = "";
-            string fullinfo = userInfo?["body"];
-            string token = userInfo?["token"];
-
-            Console.WriteLine(fullinfo);
-
-            responseHTML += "<html> <body> \n";
-            responseHTML += $"<h1> {requesttype} Battle Request </h1>";
-            responseHTML += "\n FullBody: " + fullinfo;
-            responseHTML += "\n Token: " + token;
-            bool battle = false;
-            int posinPlayList = 0;
-
-            int responseCode = 200;
-
-            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
-
-            if (requesttype == "GET")
-            {
-                UserRequests ur = new UserRequests();
-                UserEndpoint user = ur.GetUserByToken(token);
-
-                User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id, user.Matches, user.Elo);
-                if (user != null)
-                {
-                    responseHTML += "\n Checking Deck";
-
-                    bool playAble = CheckIfUserHasEnoughCards(user);
-                    if (!playAble)
-                    {
-                        responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
-                        responseHTML += "\n</body> </html>";
-                        response.UniqueResponse(writer, 400, description, responseHTML);
-                        return;
-                    }
-                    responseHTML += "\n Looking for Game Lobby";
-                    bool foundSpot = false;
-
-                    List<Card> PlayerDeck = new List<Card>();
-                    ur.GetPlayerDeckCards(ref Carduser);
-
-                    mutex_Playerlist.WaitOne();
-                    for (int i = 0; i < playerLobbylist.Count; i++)
-                    {
-                        if (playerLobbylist.ElementAt(i).Value.Count() == 1) // found free spot
-                        {
-                            foundSpot = true;
-                            posinPlayList = playerLobbylist.ElementAt(i).Key; // get lobby number
-                            playerLobbylist[posinPlayList].Add(Carduser); // add user
-
-                            responseHTML += "\n Found Spot!";
-                            Console.WriteLine("Found Spot!");
-
-                            if (playerLobbylist[posinPlayList].Count() == 2)  // can play
-                            {
-                                battle = true;
-                            }
-                            break;
-                        }
-                    }
-
-                    if (!foundSpot) // No spots open
-                    {
-                        foundSpot = true;
-                        posinPlayList = currentLobbycount++; // new lobby count
-
-                        playerLobbylist.Add(posinPlayList, new List<User>()); // open lobby
-                        playerLobbylist[posinPlayList].Add(Carduser); // add user
-
-                        GameLog.Add(posinPlayList, new Dictionary<string, string>()); // open log
-                        GameLog[posinPlayList].Add("Battle", "null"); // add log
-
-                        responseHTML += "\n Single Player, Waiting for Players";
-                        Console.WriteLine("Single Player");
-                    }
-                    mutex_Playerlist.ReleaseMutex();
-
-                    if (battle) // start battle, last player to join stats battle
-                    {
-                        List<User> playersOfRound = playerLobbylist[posinPlayList]; // get user in lobby
-                        GetPlayerDecksIDS(playersOfRound, posinPlayList); // get Player card ids
-
-                        responseHTML += "\n Battle Begin!";
-                        int status = Game.GameLoop(playersOfRound, 0); // Actual Battle
-
-                        if (status < 0) // Game return status, errorcodes
-                        {
-                            if (status == -1) // draw
-                            {
-                                GameLog[posinPlayList].Add("Log", $"\nDraw!");
-
-                                for (int i = 0; i < playersOfRound.Count; i++)
-                                {
-                                    playersOfRound[i].Matches++;
-                                    ChangeStatsOfPlayer(playersOfRound[i]);
-                                }
-                            }
-                        }
-                        else // there is a winner
-                        {
-                            Console.WriteLine($"STATUS {status}!");
-                            Console.WriteLine($"Player {playersOfRound[status].Username} Won!");
-
-                            GameLog[posinPlayList].Add("Log", $"\nPlayer {playersOfRound[status].Username} Won!");
-                            UpdatePlaylistAfterBattle(playersOfRound, status, posinPlayList); // update cards and user stats
-                        }
-
-                        GameLog[posinPlayList]["Battle"] = "done"; // cue for first player
-                    }
-
-                    while (GameLog[posinPlayList]["Battle"] != "done") //waiting for second player
-                    {
-                        //Console.WriteLine("\n Waiting for Player");
-                    }
-                    responseHTML += GameLog[posinPlayList]["Log"]; // players get battle log
-                }
-                else
-                {
-                    responseHTML += "\n Couldnt find User by token";
-                    responseCode = 400;
-                }
-            }
-            else
-                responseCode = 400;
-
-
-            responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, responseCode, description, responseHTML);
-
-            // Clear list and close lobby
-            mutex_Playerlist.WaitOne();
-            mutex_Deckids.WaitOne();
-            mutex_GameLog.WaitOne();
-            if (GameLog[posinPlayList].ContainsKey("Ended"))
-            {
-                GameLog[posinPlayList]["Ended"] = "2";
-
-                // clear
-                playerLobbylist[posinPlayList].Clear();
-                GameLog[posinPlayList].Clear();
-                deckcard_ids[posinPlayList].Clear();
-
-                // remove
-                playerLobbylist.Remove(posinPlayList);
-                GameLog.Remove(posinPlayList);
-                deckcard_ids.Remove(posinPlayList);
-            }
-            else
-            {
-                GameLog[posinPlayList].Add("Ended", "1");
-            }
-            mutex_Playerlist.ReleaseMutex();
-            mutex_Deckids.ReleaseMutex();
-            mutex_GameLog.ReleaseMutex();
-
-            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
-        }
-
-        public bool CheckIfUserHasEnoughCards(UserEndpoint user)
-        {
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id AND card_indeck = true;";
-
-            command.CommandText = query;
-
-            // parameters
-            AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-
-            var result = command.ExecuteScalar();
-
-            if (result == null)
-            {
-                Console.WriteLine("DeckCards couldnt be found");
-                return false;
-            }
-            else
-            {
-                Console.WriteLine("Deck found!");
-                int count = (int)(long)result;
-                if (count < 4)
-                {
-                    Console.WriteLine("Too Little Cards");
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-        }
-
-        public void GetPlayerDecksIDS(List<User> playersOfRound, int pos)
+        public void GetPlayers_DecksIDs(List<User> playersOfRound, int pos)
         {
             mutex_Deckids.WaitOne();
             deckcard_ids.Add(pos, new List<List<string>>());// for current lobby
@@ -541,7 +501,7 @@ namespace Server.Server.Requests
             }
             mutex_Deckids.ReleaseMutex();
         }
-        public void UpdatePlaylistAfterBattle(List<User> playersOfRound, int status, int posinLobby)
+        public void UpdatePlayers_Stack_Stats(List<User> playersOfRound, int status, int posinLobby)
         {
             for (int p = 0; p < playersOfRound.Count; p++) // take over cards
             {
@@ -559,75 +519,20 @@ namespace Server.Server.Requests
 
                 playersOfRound[p].Matches++;
                 //player update
-                ChangeStatsOfPlayer(playersOfRound[p]);
+                UserRequests useRq = new UserRequests();
+                useRq.ChangeUserStats(playersOfRound[p]);
 
+                CardRequests cardrq = new CardRequests();
                 //cards update
                 for (int c = 0; c < playersOfRound[p].Deck.Cards.Count; c++)
                 {
                     if (!deckcard_ids[posinLobby][p].Contains(playersOfRound[p].Deck.Cards[c].Id))
                     {
-                        ChangeCardToPlayer((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
+                        cardrq.AddCardToPlayerStack((playersOfRound[p].Deck.Cards[c].Id), playersOfRound[p].Id);
                     }
                 }
 
             }
-        }
-
-        public void ChangeStatsOfPlayer(User user)
-        {
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "UPDATE users SET wins = @wins, loses = @loses, matches = @matches, elo = @elo WHERE id = @user_id;";
-
-            command.CommandText = query;
-
-            // parameters
-            AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-            AddParameterWithValue(command, "@wins", DbType.Int32, user.Wins);
-            AddParameterWithValue(command, "@loses", DbType.Int32, user.Loses);
-            AddParameterWithValue(command, "@elo", DbType.Int32, user.ELO);
-            AddParameterWithValue(command, "@matches", DbType.Int32, user.Matches);
-
-            command.ExecuteNonQuery();
-        }
-
-        public void ChangeCardToPlayer(string card_id, int user_id)
-        {
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "UPDATE cards SET user_id = @user_id, card_indeck = false WHERE id = @card_id;";
-
-            command.CommandText = query;
-
-            // parameters
-            AddParameterWithValue(command, "@user_id", DbType.Int32, user_id);
-            AddParameterWithValue(command, "@card_id", DbType.String, card_id);
-
-            command.ExecuteNonQuery();
-        }
-
-
-        public async Task TradingsRequest(StreamWriter writer, string requesttype)
-        {
-            HTTP_Response response = new HTTP_Response();
-            response.UniqueResponse(writer, 200, $"TradingsRequest {requesttype}", $"<html> <body> <h1> {requesttype} TradingsRequest Request! </h1> </body> </html>");
-
-        }
-        public async Task SpecificTradingsRequest(StreamWriter writer, string requesttype)
-        {
-            HTTP_Response response = new HTTP_Response();
-            response.UniqueResponse(writer, 200, $"Specific TradingsRequest {requesttype}", $"<html> <body> <h1> {requesttype} Specific TradingsRequest Request! </h1> </body> </html>");
-
         }
 
     }

@@ -22,13 +22,11 @@ namespace Server.Server.Requests
             response.UniqueResponse(writer, 200, $"PackageResponse {requesttype}", $"<html> <body> <h1> {requesttype} PackageResponse Request! </h1> </body> </html>");
 
         }
-
         public async Task PackagesRequest(StreamWriter writer, string requesttype)
         {
             HTTP_Response response = new HTTP_Response();
             response.UniqueResponse(writer, 200, $"Packages {requesttype}", $"<html> <body> <h1> {requesttype} Packages Request! </h1> </body> </html>");
         }
-
         public async Task TransactionsPackagesRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -83,7 +81,6 @@ namespace Server.Server.Requests
         }
 
        
-
         public bool CheckUserAbleToBuy(UserEndpoint user)
         {
             if (user == null)
@@ -99,8 +96,6 @@ namespace Server.Server.Requests
 
             return true;
         }
-
-
         public void BuyPackage(UserEndpoint user, ref string html)
         {
 
@@ -117,10 +112,7 @@ namespace Server.Server.Requests
             // parameters
             GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.Id);
 
-
             command.ExecuteNonQuery();
-
-
 
             // Add Package to Userstack
             CardPackages package = new CardPackages();
@@ -149,8 +141,6 @@ namespace Server.Server.Requests
             }
 
         }
-
-
         public void AddCardtoCardTable(Card newCard, int userid, bool deck)
         {
             var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
@@ -180,8 +170,6 @@ namespace Server.Server.Requests
             newCard.PrintCard();
             command.ExecuteNonQuery();
         }
-
-
         public async Task SpecificTransactionsPackagesRequest(StreamWriter writer, string Http_type)
         {
             HTTP_Response response = new HTTP_Response();

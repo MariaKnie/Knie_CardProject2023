@@ -17,6 +17,70 @@ namespace Server.Server.Requests
     internal class UserRequests
     {
 
+        public async Task StatsRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        {
+            HTTP_Response response = new HTTP_Response();
+            string description = $"Stats Request {requesttype}";
+            string responseHTML = "";
+            string fullinfo = userInfo?["body"];
+            string token = userInfo?["token"];
+            int responseCode = 200;
+            Console.WriteLine(fullinfo);
+
+            responseHTML += "<html> <body> \n";
+            responseHTML += $"<h1> {requesttype} Stats Request </h1>";
+            responseHTML += "\n FullBody: " + fullinfo;
+            responseHTML += "\n Token: " + token;
+
+
+
+            if (requesttype == "GET")
+            {
+                UserRequests ur = new UserRequests();
+                UserEndpoint user = ur.GetUserByToken(token);
+
+                if (user != null)
+                {
+                    int matches = user.Matches;
+                    float win_perc = 0;
+                    float lose_perc = 0;
+                    float drawchance = 0;
+                    float deciededmatches = 0;
+                    if (matches > 0) // to avoid math exeptions
+                    {
+                        win_perc = ((float)user.Wins / (float)matches) * 100;
+                        lose_perc = ((float)user.Loses / (float)matches) * 100;
+                        deciededmatches = user.Loses + user.Wins;
+                        deciededmatches = (float)user.Matches - deciededmatches;
+                        drawchance = ((deciededmatches) / (float)user.Matches) * 100;
+
+                    }
+
+                    responseHTML += $"\nWins: {user.Wins}";
+                    responseHTML += $"\nLoses: {user.Loses}";
+                    responseHTML += $"\nDraws: {deciededmatches}";
+
+                    responseHTML += $"\nWinChance: {win_perc}%";
+                    responseHTML += $"\nLoseChance: {lose_perc}%";
+                    responseHTML += $"\nDrawChance: {drawchance}%";
+                    responseHTML += $"\nMatches Played: {user.Matches}";
+                    responseHTML += $"\nELO: {user.Elo}";
+                }
+                else
+                {
+                    responseHTML += "\n Couldnt find User by token";
+                    responseCode = 400;
+                }
+            }
+            else
+            {
+                responseCode = 400;
+            }
+
+
+            responseHTML += "\n</body> </html>";
+            response.UniqueResponse(writer, responseCode, description, responseHTML);
+        }
         public async Task UserRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -51,7 +115,7 @@ namespace Server.Server.Requests
                     responseCode = 400;
                 }
             }
-            else 
+            else
             {
                 responseCode = 400;
             }
@@ -59,7 +123,6 @@ namespace Server.Server.Requests
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
-
         public async Task UserSpecificRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -83,8 +146,16 @@ namespace Server.Server.Requests
 
             if (user != null && temptoken == subpath_user)  // see if token is used by the right user
             {
-
                 if (requesttype == "GET")
+                {
+
+                    responseHTML += "\n Get User Data \n\n";
+                    responseHTML += "\n { \"User\": {";
+
+                    responseHTML += JsonSerializer.Serialize<UserEndpoint>(user);
+                    responseHTML += "\n } \n}";
+                }
+                else if (requesttype == "PUT")
                 {
                     if (fullinfo.Length > 0) // change user data
                     {
@@ -120,7 +191,7 @@ namespace Server.Server.Requests
                                     }
                                 }
                                 InfoToChange_Dic.Add(key, value);
-                                Console.WriteLine($" \nUser Snip {i} : \nKey: " + InfoToChange_Dic.ElementAt(InfoToChange_Dic.Count - 1).Key + "\nValue: " + InfoToChange_Dic.ElementAt(InfoToChange_Dic.Count-1).Value);
+                                Console.WriteLine($" \nUser Snip {i} : \nKey: " + InfoToChange_Dic.ElementAt(InfoToChange_Dic.Count - 1).Key + "\nValue: " + InfoToChange_Dic.ElementAt(InfoToChange_Dic.Count - 1).Value);
                             }
                         }
                         catch (Exception e)
@@ -135,7 +206,7 @@ namespace Server.Server.Requests
                         bool canchange = true;
                         if (InfoToChange_Dic.ContainsKey("username"))
                         {
-                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["username"]);                      
+                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["username"]);
                         }
                         if (canchange)
                         {
@@ -145,23 +216,16 @@ namespace Server.Server.Requests
                         {
                             responseHTML += "\nUsername is already taken";
                         }
-
                     }
-                    else // get user data
+                    else
                     {
-                        responseHTML += "\n Get User Data \n\n";
-                        responseHTML += "\n { \"User\": {";
-
-                        responseHTML += JsonSerializer.Serialize<UserEndpoint>(user);
-                        responseHTML += "\n } \n}";
+                        responseHTML += "\nNo Data to change";
                     }
                 }
                 else
                 {
                     responseCode = 400;
                 }
-
-
             }
             else
             {
@@ -173,34 +237,6 @@ namespace Server.Server.Requests
 
         }
 
-
-        public void ChangeUserData(UserEndpoint user, Dictionary<string, string> newUserdata)
-        {
-
-            for (int i = 0; i < newUserdata.Count; i++)
-            {
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            Console.WriteLine("IN CHANGE\n");
-                using IDbCommand command = connection.CreateCommand();
-                string col = newUserdata.ElementAt(i).Key;
-                string query = "UPDATE users SET " + col + " = @value WHERE id = @id;";
-
-                Console.WriteLine(newUserdata.ElementAt(i).Key + " - " + newUserdata.ElementAt(i).Value);
-
-                command.CommandText = query;
-
-                // parameters
-                GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.Id);
-                GeneralRequests.AddParameterWithValue(command, "@value", DbType.String, newUserdata.ElementAt(i).Value);
-
-                command.ExecuteNonQuery();
-            }
-        }
 
         public bool SeeIfUserIsINDB(string username)
         {
@@ -240,8 +276,6 @@ namespace Server.Server.Requests
             }
 
         }
-
-
         public void AddUsertoDb(UserEndpoint user)
         {
             // Connection
@@ -268,9 +302,6 @@ namespace Server.Server.Requests
 
             command.ExecuteNonQuery();
         }
-
-
-
         public UserEndpoint GetUserByToken(string token)
         {
             UserEndpoint user = null;
@@ -350,76 +381,34 @@ namespace Server.Server.Requests
 
             return user;
         }
-
-
-        public async Task StatsRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
+        public void ChangeUserData(UserEndpoint user, Dictionary<string, string> newUserdata)
         {
-            HTTP_Response response = new HTTP_Response();
-            string description = $"Stats Request {requesttype}";
-            string responseHTML = "";
-            string fullinfo = userInfo?["body"];
-            string token = userInfo?["token"];
-            int responseCode = 200;
-            Console.WriteLine(fullinfo);
 
-            responseHTML += "<html> <body> \n";
-            responseHTML += $"<h1> {requesttype} Stats Request </h1>";
-            responseHTML += "\n FullBody: " + fullinfo;
-            responseHTML += "\n Token: " + token;
-
-
-
-            if (requesttype == "GET")
+            for (int i = 0; i < newUserdata.Count; i++)
             {
-                UserRequests ur = new UserRequests();
-                UserEndpoint user = ur.GetUserByToken(token);
+                // Connection
+                var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+                using IDbConnection connection = new NpgsqlConnection(connString);
+                connection.Open();
 
-                if (user != null)
-                {
-                    int matches = user.Matches;
-                    float win_perc = 0;
-                    float lose_perc = 0;
-                    float drawchance = 0;
-                    float deciededmatches = 0;
-                    if (matches > 0) // to avoid math exeptions
-                    {
-                        win_perc = ((float)user.Wins / (float)matches) * 100;
-                        lose_perc = ((float)user.Loses / (float)matches) * 100;
-                        deciededmatches = user.Loses + user.Wins;
-                        deciededmatches = (float)user.Matches - deciededmatches;
-                        drawchance = ((deciededmatches) / (float)user.Matches)*100;
-                        
-                    }
+                // command
+                Console.WriteLine("IN CHANGE\n");
+                using IDbCommand command = connection.CreateCommand();
+                string col = newUserdata.ElementAt(i).Key;
+                string query = "UPDATE users SET " + col + " = @value WHERE id = @id;";
 
-                    responseHTML += $"\nWins: {user.Wins}";
-                    responseHTML += $"\nLoses: {user.Loses}";
-                    responseHTML += $"\nDraws: {deciededmatches}";
+                Console.WriteLine(newUserdata.ElementAt(i).Key + " - " + newUserdata.ElementAt(i).Value);
 
-                    responseHTML += $"\nWinChance: {win_perc }%";
-                    responseHTML += $"\nLoseChance: {lose_perc}%";
-                    responseHTML += $"\nDrawChance: {drawchance}%";
-                    responseHTML += $"\nMatches Played: {user.Matches}";
-                    responseHTML += $"\nELO: {user.Elo}";
-                }
-                else
-                {
-                    responseHTML += "\n Couldnt find User by token";
-                    responseCode = 400;
-                }
+                command.CommandText = query;
+
+                // parameters
+                GeneralRequests.AddParameterWithValue(command, "@id", DbType.Int32, user.Id);
+                GeneralRequests.AddParameterWithValue(command, "@value", DbType.String, newUserdata.ElementAt(i).Value);
+
+                command.ExecuteNonQuery();
             }
-            else
-            {
-                responseCode = 400;
-            }
-
-
-            responseHTML += "\n</body> </html>";
-            response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
-
-
-
-        public void GetPlayerDeckCards(ref User user)
+        public void GetUserDeckCards(ref User user)
         {
             PackageEndPoint packageEndPoint = new PackageEndPoint();
             // Connection
@@ -437,7 +426,7 @@ namespace Server.Server.Requests
 
             using IDataReader reader = command.ExecuteReader();
             int count = 0;
-            Console.WriteLine("READING CARDS FROM PLAYER " + user.Username); 
+            Console.WriteLine("READING CARDS FROM PLAYER " + user.Username);
             while (reader.Read())
             {
                 count++;
@@ -476,11 +465,33 @@ namespace Server.Server.Requests
                     spellCard.PrintCard();
                 }
 
-
             }
             Console.WriteLine();
 
 
         }
+        public void ChangeUserStats(User user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "UPDATE users SET wins = @wins, loses = @loses, matches = @matches, elo = @elo WHERE id = @user_id;";
+
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+            GeneralRequests.AddParameterWithValue(command, "@wins", DbType.Int32, user.Wins);
+            GeneralRequests.AddParameterWithValue(command, "@loses", DbType.Int32, user.Loses);
+            GeneralRequests.AddParameterWithValue(command, "@elo", DbType.Int32, user.ELO);
+            GeneralRequests.AddParameterWithValue(command, "@matches", DbType.Int32, user.Matches);
+
+            command.ExecuteNonQuery();
+        }
+
     }
 }

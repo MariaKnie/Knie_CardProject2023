@@ -56,6 +56,7 @@ namespace Knie_CardProject2023.Server
             CardRequests cards = new CardRequests();
             PackagesRequests packages = new PackagesRequests();
             GeneralRequests general = new GeneralRequests();
+            TradingRequests trading = new TradingRequests();
 
             Dictionary<string, string> userInfo = new Dictionary<string, string>();
             userInfo.Add("token", token);
@@ -86,8 +87,8 @@ namespace Knie_CardProject2023.Server
             headers.Add("/transactions", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo));
             headers.Add("/transactions/packages", () => packages.TransactionsPackagesRequest(writer, Http_type, userInfo)); ;
             headers.Add("/transactions/", () => packages.SpecificTransactionsPackagesRequest(writer, Http_type));
-            headers.Add("/tradings", () => general.TradingsRequest(writer, Http_type));
-            headers.Add("/tradings/", () => general.SpecificTradingsRequest(writer, Http_type));
+            headers.Add("/tradings", () => trading.TradingsRequest(writer, Http_type, userInfo));
+            headers.Add("/tradings/", () => trading.SpecificTradingsRequest(writer, Http_type, userInfo));
 
 
             if (headers.ContainsKey(path)) //specifics routes wont work  -> users/

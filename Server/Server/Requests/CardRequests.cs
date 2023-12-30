@@ -79,171 +79,6 @@ namespace Server.Server
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
-
-        public int CheckIfUserHasCards(UserEndpoint user)
-        {
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id";
-            command.CommandText = query;
-
-            // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-
-            var result = command.ExecuteScalar();
-
-            if (result == null)
-            {
-                Console.WriteLine("Cards couldnt be found");
-                return -1;
-            }
-
-            Console.WriteLine($"Cards found! Count {(int)(long)result}");
-            int count = (int)(long)result;
-            return count;
-        }
-
-        public int CheckIfUserHasDeckCards(UserEndpoint user)
-        {
-            if (user == null)
-            {
-                return -1;
-            }
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id AND card_indeck = true";
-            command.CommandText = query;
-
-            // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-
-            var result = command.ExecuteScalar();
-
-            if (result == null)
-            {
-                Console.WriteLine("DeckCards couldnt be found");
-                return -1;
-            }
-
-            Console.WriteLine("DeckCards found!");
-            int count = (int)(long)result;
-            return count;
-        }
-
-        public string ShowAllUserCards(UserEndpoint user)
-        {
-            PackageEndPoint packageEndPoint = new PackageEndPoint();
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT * FROM cards WHERE user_id = @user_id";
-            command.CommandText = query;
-
-            // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-
-            using IDataReader reader = command.ExecuteReader();
-            int count = 0;
-            string jsonToSendBack = "\n{\n\"cards\":{\n";
-            while (reader.Read())
-            {
-                count++;
-                CardEndpoint readCard = new()
-                {
-                    id = (string)reader["id"],
-                    Name = (string)reader["card_name"],
-                    Damage = (int)reader["card_damage"],
-                    CardType = (string)reader["card_type"],
-                    ElementType = (string)reader["card_element"],
-                    Description = ""
-
-                };
-
-                int columnIndex = reader.GetOrdinal("card_description");
-                if (!reader.IsDBNull(columnIndex))
-                {
-
-                    user.Bio = (string)reader["card_description"];
-                }
-
-                Console.WriteLine($"CardNumber {count}");
-                readCard.PrintCard();
-                packageEndPoint.package.Add(readCard);
-                jsonToSendBack += JsonSerializer.Serialize<CardEndpoint>(readCard);
-            }
-            Console.WriteLine();
-            jsonToSendBack += "\n}\n}";
-            Console.WriteLine(jsonToSendBack);
-
-            return jsonToSendBack;
-        }
-
-        public string ShowAllUserDeckCards(UserEndpoint user)
-        {
-            PackageEndPoint packageEndPoint = new PackageEndPoint();
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT * FROM cards WHERE user_id = @user_id AND card_indeck = true";
-            command.CommandText = query;
-
-            // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-
-            using IDataReader reader = command.ExecuteReader();
-            int count = 0;
-            string jsonToSendBack = "\n{\n\"deck_cards\":{\n";
-            while (reader.Read())
-            {
-                count++;
-                CardEndpoint readCard = new()
-                {
-                    id = (string)reader["id"],
-                    Name = (string)reader["card_name"],
-                    Damage = (int)reader["card_damage"],
-                    CardType = (string)reader["card_type"],
-                    ElementType = (string)reader["card_element"],
-                    Description = ""
-
-                };
-
-                int columnIndex = reader.GetOrdinal("card_description");
-                if (!reader.IsDBNull(columnIndex))
-                {
-
-                    user.Bio = (string)reader["card_description"];
-                }
-
-                Console.WriteLine($"CardNumber {count}");
-                readCard.PrintCard();
-                packageEndPoint.package.Add(readCard);
-                jsonToSendBack += JsonSerializer.Serialize<CardEndpoint>(readCard);
-            }
-            Console.WriteLine();
-            jsonToSendBack += "\n}\n}";
-            Console.WriteLine(jsonToSendBack);
-
-            return jsonToSendBack;
-        }
-
         public async Task DeckRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
 
@@ -296,7 +131,7 @@ namespace Server.Server
             }
             else if (requesttype == "PUT")
             {
-                // show deck cards
+                // cahnge deck cards
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
 
@@ -313,9 +148,10 @@ namespace Server.Server
                     {
                         responseHTML += "Deck needs to be exactly 4 cards! You put " + parts1.Length;
                         responseHTML += "\n</body> </html>";
-                        response.UniqueResponse(writer, 200, description, responseHTML);
+                        response.UniqueResponse(writer, 400, description, responseHTML);
                         return;
                     }
+
                     for (int i = 0; i < 4; i++)
                     {
                         parts1[i] = parts1[i].Trim();
@@ -327,7 +163,6 @@ namespace Server.Server
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Too little cards" + e.Message);
                     responseHTML += "\n Too little cards";
                     responseHTML += "\n</body> </html>";
                     response.UniqueResponse(writer, 200, description, responseHTML);
@@ -340,16 +175,26 @@ namespace Server.Server
                     responseHTML += "\n Found User by token";
                 }
                 List<string> cardCount = GetAllDeckIds(user);
+                for (int i = 0; i < cardCount.Count; i++)
+                {
+                    if (SeeIfCardIsInTradings(cardCount[i])) // if card is up for trading fail
+                    {
+                        responseHTML += "\n ERROR \nCard:" + cardCount[i] + " is put up for trading!";
+                        responseHTML += "\n</body> </html>";
+                        response.UniqueResponse(writer, 400, description, responseHTML);
+                        return;
 
+                    }
+                }
                 if (cardCount.Count >= 0)
                 {
                     if (cardCount.Count > 0)
                     {
                         responseHTML += "\n Able to Switch";
-                        PullOutOfDeckIds(cardCount);
+                        PullOutOfDeck(cardCount);
                         responseHTML += "\n Pulled old out";
-                        PutIntoDeckIds(NewDeckIDs);
-                        responseHTML += "\n put new in";
+                        PutIntoDeck(NewDeckIDs);
+                        responseHTML += "\n Put new in";
                     }
                     else
                     {
@@ -372,85 +217,6 @@ namespace Server.Server
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
-
-        public List<string> GetAllDeckIds(UserEndpoint user)
-        {
-            List<string> cardids = new List<string>();
-
-            PackageEndPoint packageEndPoint = new PackageEndPoint();
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT id FROM cards WHERE user_id = @user_id AND card_indeck = true;";
-            command.CommandText = query;
-
-            // parameters
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
-
-            using IDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                string id = (string)reader["id"];
-                cardids.Add(id);
-            }
-            return cardids;
-        }
-
-        public void PullOutOfDeckIds(List<string> ids)
-        {
-            List<string> cardids = new List<string>();
-
-            PackageEndPoint packageEndPoint = new PackageEndPoint();
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            for (int i = 0; i < ids.Count; i++)
-            {
-
-                using IDbCommand command = connection.CreateCommand();
-                string query = "UPDATE cards SET card_indeck = false WHERE id = @card_id";
-                command.CommandText = query;
-
-                // parameters
-                GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, ids[i]);
-
-                command.ExecuteNonQuery();
-            }
-        }
-
-        public void PutIntoDeckIds(List<string> ids)
-        {
-            List<string> cardids = new List<string>();
-
-            PackageEndPoint packageEndPoint = new PackageEndPoint();
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            for (int i = 0; i < ids.Count; i++)
-            {
-
-                using IDbCommand command = connection.CreateCommand();
-                string query = "UPDATE cards SET card_indeck = true WHERE id = @card_id";
-                command.CommandText = query;
-
-                // parameters
-                GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, ids[i]);
-
-                command.ExecuteNonQuery();
-            }
-        }
-
-
         public async Task DeckPlainRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -505,8 +271,166 @@ namespace Server.Server
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
+     
+        public int CheckIfUserHasCards(UserEndpoint user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
 
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id";
+            command.CommandText = query;
 
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            var result = command.ExecuteScalar();
+
+            if (result == null)
+            {
+                Console.WriteLine("Cards couldnt be found");
+                return -1;
+            }
+
+            Console.WriteLine($"Cards found! Count {(int)(long)result}");
+            int count = (int)(long)result;
+            return count;
+        }
+        public int CheckIfUserHasDeckCards(UserEndpoint user)
+        {
+            if (user == null)
+            {
+                return -1;
+            }
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id AND card_indeck = true";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            var result = command.ExecuteScalar();
+
+            if (result == null)
+            {
+                Console.WriteLine("DeckCards couldnt be found");
+                return -1;
+            }
+
+            Console.WriteLine("DeckCards found!");
+            int count = (int)(long)result;
+            return count;
+        }
+        public string ShowAllUserCards(UserEndpoint user)
+        {
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM cards WHERE user_id = @user_id";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            using IDataReader reader = command.ExecuteReader();
+            int count = 0;
+            string jsonToSendBack = "\n{\n\"cards\":{\n";
+            while (reader.Read())
+            {
+                count++;
+                CardEndpoint readCard = new()
+                {
+                    id = (string)reader["id"],
+                    Name = (string)reader["card_name"],
+                    Damage = (int)reader["card_damage"],
+                    CardType = (string)reader["card_type"],
+                    ElementType = (string)reader["card_element"],
+                    Description = ""
+
+                };
+
+                int columnIndex = reader.GetOrdinal("card_description");
+                if (!reader.IsDBNull(columnIndex))
+                {
+                    readCard.Description = (string)reader["card_description"];
+                }
+
+                Console.WriteLine($"CardNumber {count}");
+                readCard.PrintCard();
+                packageEndPoint.package.Add(readCard);
+                jsonToSendBack += JsonSerializer.Serialize<CardEndpoint>(readCard);
+            }
+            Console.WriteLine();
+            jsonToSendBack += "\n}\n}";
+            Console.WriteLine(jsonToSendBack);
+
+            return jsonToSendBack;
+        }
+        public string ShowAllUserDeckCards(UserEndpoint user)
+        {
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM cards WHERE user_id = @user_id AND card_indeck = true";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            using IDataReader reader = command.ExecuteReader();
+            int count = 0;
+            string jsonToSendBack = "\n{\n\"deck_cards\":{\n";
+            while (reader.Read())
+            {
+                count++;
+                CardEndpoint readCard = new()
+                {
+                    id = (string)reader["id"],
+                    Name = (string)reader["card_name"],
+                    Damage = (int)reader["card_damage"],
+                    CardType = (string)reader["card_type"],
+                    ElementType = (string)reader["card_element"],
+                    Description = ""
+
+                };
+
+                int columnIndex = reader.GetOrdinal("card_description");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    readCard.Description = (string)reader["card_description"];
+                }
+
+                Console.WriteLine($"CardNumber {count}");
+                readCard.PrintCard();
+                packageEndPoint.package.Add(readCard);
+                jsonToSendBack += JsonSerializer.Serialize<CardEndpoint>(readCard);
+            }
+            Console.WriteLine();
+            jsonToSendBack += "\n}\n}";
+            Console.WriteLine(jsonToSendBack);
+
+            return jsonToSendBack;
+        }
         public string ShowAllUserDeckCardsPlain(UserEndpoint user)
         {
             // Connection
@@ -555,6 +479,226 @@ namespace Server.Server
             Console.WriteLine(jsonToSendBack);
 
             return jsonToSendBack;
+        }
+
+        public void PullOutOfDeck(List<string> ids)
+        {
+            List<string> cardids = new List<string>();
+
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            for (int i = 0; i < ids.Count; i++)
+            {
+
+                using IDbCommand command = connection.CreateCommand();
+                string query = "UPDATE cards SET card_indeck = false WHERE id = @card_id";
+                command.CommandText = query;
+
+                // parameters
+                GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, ids[i]);
+
+                command.ExecuteNonQuery();
+            }
+        }
+        public void PutIntoDeck(List<string> ids)
+        {
+            List<string> cardids = new List<string>();
+
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            for (int i = 0; i < ids.Count; i++)
+            {
+
+                using IDbCommand command = connection.CreateCommand();
+                string query = "UPDATE cards SET card_indeck = true WHERE id = @card_id";
+                command.CommandText = query;
+
+                // parameters
+                GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, ids[i]);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Used in Battle
+        public bool CheckEnoughDeckCards(UserEndpoint user)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT COUNT(*) FROM cards WHERE user_id = @user_id AND card_indeck = true;";
+
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            var result = command.ExecuteScalar();
+
+            if (result == null)
+            {
+                Console.WriteLine("DeckCards couldnt be found");
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Deck found!");
+                int count = (int)(long)result;
+                if (count < 4)
+                {
+                    Console.WriteLine("Too Little Cards");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+        public List<string> GetAllDeckIds(UserEndpoint user)
+        {
+            List<string> cardids = new List<string>();
+
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT id FROM cards WHERE user_id = @user_id AND card_indeck = true;";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user.Id);
+
+            using IDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                string id = (string)reader["id"];
+                cardids.Add(id);
+            }
+            return cardids;
+        }
+        public void AddCardToPlayerStack(string card_id, int user_id)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "UPDATE cards SET user_id = @user_id, card_indeck = false WHERE id = @card_id;";
+
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user_id);
+            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, card_id);
+
+            command.ExecuteNonQuery();
+        }
+        public bool SeeIfCardIsInTradings(string cardId)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT COUNT(*) FROM trades WHERE card_id = @card_id;";
+            command.CommandText = query;
+
+            // parameters
+            //command.Parameters.AddWithValue("@Username", username);
+            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, cardId);
+
+
+            var count = command.ExecuteScalar();
+
+            if (count == null)
+            {
+                Console.WriteLine("AN ERROR OCCURED");
+                return true;
+            }
+
+
+            if ((Int64)count > 0)
+            {
+                Console.WriteLine("Username exists in the database.");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Username does not exist in the database.");
+                return false;
+            }
+        }
+
+
+        // For Trade
+        public Card GetUserSpecificCards(string card_id, int user_id)
+        {
+            PackageEndPoint packageEndPoint = new PackageEndPoint();
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM cards WHERE id = @id AND card_indeck = false AND user_id = @user_id";
+            command.CommandText = query;
+
+            // parameters
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, card_id);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user_id);
+
+            using IDataReader reader = command.ExecuteReader();
+            Console.WriteLine("READING CARD FROM PLAYER " + card_id);
+
+            SpellCard card = new SpellCard();
+
+            while (reader.Read())
+            {
+                card = new()
+                {
+                    Id = (string)reader["id"],
+                    Name = (string)reader["card_name"],
+                    Damage = (int)reader["card_damage"],
+                    CardType = (string)reader["card_type"],
+                    ElementType = (string)reader["card_element"],
+                    Description = ""
+                };
+
+                int columnIndex = reader.GetOrdinal("card_description");
+                if (!reader.IsDBNull(columnIndex))
+                {
+
+                    card.Description = (string)reader["card_description"];
+                }
+                card.PrintCard();
+
+            }
+
+            return card;
         }
     }
 }
