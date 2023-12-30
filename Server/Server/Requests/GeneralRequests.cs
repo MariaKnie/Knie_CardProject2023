@@ -311,7 +311,7 @@ namespace Server.Server.Requests
             mutex_Playerlist.WaitOne();
             mutex_Deckids.WaitOne();
             mutex_GameLog.WaitOne();
-            if (GameLog[posinPlayList].ContainsKey("Ended"))
+            if (GameLog.ContainsKey(posinPlayList) && GameLog[posinPlayList].ContainsKey("Ended"))
             {
                 GameLog[posinPlayList]["Ended"] = "2";
 
@@ -325,7 +325,7 @@ namespace Server.Server.Requests
                 GameLog.Remove(posinPlayList);
                 deckcard_ids.Remove(posinPlayList);
             }
-            else
+            else if(GameLog.ContainsKey(posinPlayList))
             {
                 GameLog[posinPlayList].Add("Ended", "1");
             }

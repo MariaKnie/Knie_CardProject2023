@@ -184,6 +184,14 @@ namespace Server.Server
                             return;
 
                         }
+                        Card temp2 =  GetUserSpecificCards(cardCount[i], user.Id); // see if card belongs to user
+                        if (temp2.Name == null)
+                        {
+                            responseHTML += "\n ERROR \nCard:" + cardCount[i] + " not found!";
+                            responseHTML += "\n</body> </html>";
+                            response.UniqueResponse(writer, 400, description, responseHTML);
+                            return;
+                        }
                     }
                     if (cardCount.Count >= 0)
                     {
@@ -647,12 +655,12 @@ namespace Server.Server
 
             if ((Int64)count > 0)
             {
-                Console.WriteLine("Username exists in the database.");
+                Console.WriteLine("CardId exists in the database.");
                 return true;
             }
             else
             {
-                Console.WriteLine("Username does not exist in the database.");
+                Console.WriteLine("CardId does not exist in the database.");
                 return false;
             }
         }
