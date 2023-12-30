@@ -35,7 +35,7 @@ namespace Server.Server
 
 
 
-            if (requesttype == "POST")
+            if (requesttype == "GET")
             {
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
