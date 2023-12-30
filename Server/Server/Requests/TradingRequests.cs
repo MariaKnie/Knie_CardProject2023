@@ -250,6 +250,17 @@ namespace Server.Server.Requests
                         responseHTML += "\nTrade not found Or Author of Trade";
                     }
                 }
+                else if (requesttype == "DELETE")
+                {
+                    responseHTML += "\n Get Trade Data \n\n";
+                    TradeEndpoint tradeToGet = GetSpecificTrade(subpath_user);
+
+                    if (tradeToGet.id != null && tradeToGet.user_id == user.Id) // if trade could be found and is same as author
+                    {
+                        DeleteSpecificTrade(tradeToGet.id);
+                        responseHTML += "\n Author Deleted Trade!";
+                    }  
+                }
                 else
                 {
                     responseHTML += "\n Wrong Method";

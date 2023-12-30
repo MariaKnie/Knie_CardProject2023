@@ -191,9 +191,9 @@ namespace Server.Server.Requests
 
             int responseCode = 200;
 
-            Console.WriteLine("Lobbycount : " + playerLobbylist.Count);
+            Console.WriteLine("- Lobbycount : " + playerLobbylist.Count);
 
-            if (requesttype == "GET")
+            if (requesttype == "POST")
             {
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
@@ -302,7 +302,13 @@ namespace Server.Server.Requests
                 }
             }
             else
+            {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
+                responseHTML += "\n</body> </html>";
+                response.UniqueResponse(writer, responseCode, description, responseHTML);
+                return;
+            }
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
