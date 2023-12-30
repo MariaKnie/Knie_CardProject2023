@@ -284,7 +284,7 @@ namespace Server.Server
                     }
                     else
                     {
-                        responseHTML += "\n UNABLE to DeeckShow cards, No Cards in Account";
+                        responseHTML += "\n UNABLE to DeckShow cards, No Cards in Account";
                         responseCode = 500;
                     }
                 }
@@ -489,7 +489,7 @@ namespace Server.Server
                     }
                     else
                     {
-                        responseHTML += "\n UNABLE to DeeckShow cards, No Cards in Account";
+                        responseHTML += "\n UNABLE to DeckShow cards, No Cards in Account";
                         responseCode = 500;
                     }
                 }

@@ -123,9 +123,9 @@ namespace Server.Server.Requests
 
 
             // Add Package to Userstack
-            CardPackages packagee = new CardPackages();
+            CardPackages package = new CardPackages();
             PackageEndPoint newPackage = new PackageEndPoint();
-               newPackage.packageCard = packagee.CreatePackageDB();
+               newPackage.packageCard = package.CreatePackageDB();
 
             CardRequests cr = new CardRequests();
             int DeckCount = cr.CheckIfUserHasDeckCards(user);

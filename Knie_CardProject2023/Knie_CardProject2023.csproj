@@ -8,8 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ResponseTypes\**" />
+    <EmbeddedResource Remove="ResponseTypes\**" />
+    <None Remove="ResponseTypes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Enums\" />
-    <Folder Include="ResponseTypes\" />
   </ItemGroup>
 
 </Project>

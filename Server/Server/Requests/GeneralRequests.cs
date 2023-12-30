@@ -356,8 +356,8 @@ namespace Server.Server.Requests
                 {
                     responseHTML += "\n Checking Deck";
 
-                    bool playAblee = CheckIfUserHasEnoughCards(user);
-                    if (!playAblee)
+                    bool playAble = CheckIfUserHasEnoughCards(user);
+                    if (!playAble)
                     {
                         responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
                         responseHTML += "\n</body> </html>";
@@ -393,7 +393,7 @@ namespace Server.Server.Requests
                     if (!foundSpot) // No spots open
                     {
                         foundSpot = true;
-                        posinPlayList = currentLobbycount++; // neew lobby count
+                        posinPlayList = currentLobbycount++; // new lobby count
 
                         playerLobbylist.Add(posinPlayList, new List<User>()); // open lobby
                         playerLobbylist[posinPlayList].Add(Carduser); // add user
@@ -401,7 +401,7 @@ namespace Server.Server.Requests
                         GameLog.Add(posinPlayList, new Dictionary<string, string>()); // open log
                         GameLog[posinPlayList].Add("Battle", "null"); // add log
 
-                        responseHTML += "\n Single Playeer, Waiting for Players";
+                        responseHTML += "\n Single Player, Waiting for Players";
                         Console.WriteLine("Single Player");
                     }
                     mutex_Playerlist.ReleaseMutex();
