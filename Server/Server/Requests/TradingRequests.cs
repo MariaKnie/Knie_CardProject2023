@@ -161,140 +161,6 @@ namespace Server.Server.Requests
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
-
-        public string GetAllTrades()
-        {
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT * FROM trades;";
-            command.CommandText = query;
-
-            using IDataReader reader = command.ExecuteReader();
-            int count = 0;
-            string jsonToSendBack = "\n{\n\"Trades\":{\n";
-            while (reader.Read())
-            {
-                count++;
-                TradeEndpoint readTrade = new()
-                {
-                    id = (string)reader["id"],
-                    card_ForType = (string)reader["card_fortype"],
-                    card_mindmg = (int)reader["card_mindmg"],
-                    user_id = (int)reader["user_id"]
-                };
-
-                jsonToSendBack += JsonSerializer.Serialize<TradeEndpoint>(readTrade);
-            }
-            jsonToSendBack += "\n}\n}\n";
-            return jsonToSendBack;
-        }
-        public TradeEndpoint GetSpecificTrade(string tradeId)
-        {
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT * FROM trades WHERE id = @id;";
-            command.CommandText = query;
-
-
-            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, tradeId);
-
-            using IDataReader reader = command.ExecuteReader();
-            TradeEndpoint readTrade = new TradeEndpoint();
-            while (reader.Read())
-            {
-                readTrade = new()
-                {
-                    id = (string)reader["id"],
-                    card_id = (string)reader["card_id"],
-                    card_ForType = (string)reader["card_fortype"],
-                    card_mindmg = (int)reader["card_mindmg"],
-                    user_id = (int)reader["user_id"]
-                };
-            }
-            readTrade.PrintTrade();
-            return readTrade;
-        }
-        public void AddNewTrade(TradeEndpoint newTrade)
-        {
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "INSERT INTO trades (id, card_id, card_fortype, card_mindmg, user_id) VALUES(@id, @card_id, @card_fortype, @card_mindmg, @user_id);";
-            command.CommandText = query;
-
-            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, newTrade.id);
-            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, newTrade.card_id);
-            GeneralRequests.AddParameterWithValue(command, "@card_fortype", DbType.String, newTrade.card_ForType);
-            GeneralRequests.AddParameterWithValue(command, "@card_mindmg", DbType.Int32, newTrade.card_mindmg);
-            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, newTrade.user_id);
-
-            command.ExecuteNonQuery();
-        }
-        public bool SeeIfTradeIsINDB(string card_id)
-        {
-            // Connection
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT COUNT(*) FROM trades WHERE card_id = @card_id;";
-            command.CommandText = query;
-
-            // parameters
-            //command.Parameters.AddWithValue("@Username", username);
-            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, card_id);
-
-
-            var count = command.ExecuteScalar();
-
-            if (count == null)
-            {
-                Console.WriteLine("AN ERROR OCCURED");
-                return true;
-            }
-
-
-            if ((Int64)count > 0)
-            {
-                Console.WriteLine("card_id exists in the database.");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("card_id does not exist in the database.");
-                return false;
-            }
-        }
-
-        public void DeleteSpecificTrade(string tradeId)
-        {
-            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
-            using IDbConnection connection = new NpgsqlConnection(connString);
-            connection.Open();
-
-            // command
-            using IDbCommand command = connection.CreateCommand();
-            string query = "DELETE FROM trades WHERE id = @id;";
-            command.CommandText = query;
-
-            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, tradeId);
-
-           command.ExecuteNonQuery();
-        }
-
         public async Task SpecificTradingsRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -389,8 +255,138 @@ namespace Server.Server.Requests
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
 
+        public bool SeeIfTradeIsINDB(string card_id)
+        {
+            // Connection
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
 
-       public bool CheckTradeParameter(TradeEndpoint toget, Card myCard)
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT COUNT(*) FROM trades WHERE card_id = @card_id;";
+            command.CommandText = query;
+
+            // parameters
+            //command.Parameters.AddWithValue("@Username", username);
+            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, card_id);
+
+
+            var count = command.ExecuteScalar();
+
+            if (count == null)
+            {
+                Console.WriteLine("AN ERROR OCCURED");
+                return true;
+            }
+
+
+            if ((Int64)count > 0)
+            {
+                Console.WriteLine("card_id exists in the database.");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("card_id does not exist in the database.");
+                return false;
+            }
+        }
+        public void AddNewTrade(TradeEndpoint newTrade)
+        {
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "INSERT INTO trades (id, card_id, card_fortype, card_mindmg, user_id) VALUES(@id, @card_id, @card_fortype, @card_mindmg, @user_id);";
+            command.CommandText = query;
+
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, newTrade.id);
+            GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, newTrade.card_id);
+            GeneralRequests.AddParameterWithValue(command, "@card_fortype", DbType.String, newTrade.card_ForType);
+            GeneralRequests.AddParameterWithValue(command, "@card_mindmg", DbType.Int32, newTrade.card_mindmg);
+            GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, newTrade.user_id);
+
+            command.ExecuteNonQuery();
+        }
+        public string GetAllTrades()
+        {
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM trades;";
+            command.CommandText = query;
+
+            using IDataReader reader = command.ExecuteReader();
+            int count = 0;
+            string jsonToSendBack = "\n{\n\"Trades\":{\n";
+            while (reader.Read())
+            {
+                count++;
+                TradeEndpoint readTrade = new()
+                {
+                    id = (string)reader["id"],
+                    card_ForType = (string)reader["card_fortype"],
+                    card_mindmg = (int)reader["card_mindmg"],
+                    user_id = (int)reader["user_id"]
+                };
+
+                jsonToSendBack += JsonSerializer.Serialize<TradeEndpoint>(readTrade);
+            }
+            jsonToSendBack += "\n}\n}\n";
+            return jsonToSendBack;
+        }
+        public TradeEndpoint GetSpecificTrade(string tradeId)
+        {
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "SELECT * FROM trades WHERE id = @id;";
+            command.CommandText = query;
+
+
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, tradeId);
+
+            using IDataReader reader = command.ExecuteReader();
+            TradeEndpoint readTrade = new TradeEndpoint();
+            while (reader.Read())
+            {
+                readTrade = new()
+                {
+                    id = (string)reader["id"],
+                    card_id = (string)reader["card_id"],
+                    card_ForType = (string)reader["card_fortype"],
+                    card_mindmg = (int)reader["card_mindmg"],
+                    user_id = (int)reader["user_id"]
+                };
+            }
+            readTrade.PrintTrade();
+            return readTrade;
+        }
+        public void DeleteSpecificTrade(string tradeId)
+        {
+            var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
+            using IDbConnection connection = new NpgsqlConnection(connString);
+            connection.Open();
+
+            // command
+            using IDbCommand command = connection.CreateCommand();
+            string query = "DELETE FROM trades WHERE id = @id;";
+            command.CommandText = query;
+
+            GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, tradeId);
+
+           command.ExecuteNonQuery();
+        }
+        public bool CheckTradeParameter(TradeEndpoint toget, Card myCard)
         {
             if (toget.card_ForType == myCard.CardType && toget.card_mindmg <= myCard.Damage)
             {
