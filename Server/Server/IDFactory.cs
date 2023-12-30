@@ -12,7 +12,6 @@ namespace Server.Server
         {
             return Guid.NewGuid().ToString("N");
         }
-
         public string generateID(string sourceUrl)
         {
             return string.Format("{0}_{1:N}", sourceUrl, Guid.NewGuid());

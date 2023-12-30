@@ -39,32 +39,32 @@ namespace Server.Server
             {
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
-                if (user != null)
+                if (user != null) // If user found
                 {
                     responseHTML += "\n Found User by token";
                     int cardCount = CheckIfUserHasCards(user);
 
-                    if (cardCount >= 0)
+                    if (cardCount >= 0) // if able to retrive cards at all
                     {
-                        if (cardCount > 0)
+                        if (cardCount > 0) // cards in Acc
                         {
                             responseHTML += "\n Able to Show cards";
                             responseHTML += ShowAllUserCards(user);
                             responseHTML += "\n Showed Cards";
                         }
-                        else
+                        else// no cards Acc
                         {
                             responseHTML += "\n UNABLE to Show cards, No Cards in Account";
                             responseCode = 500;
                         }
                     }
-                    else
+                    else // Couldnt retrive cards, error while query
                     {
                         responseHTML += "\n Error While trying to read cards";
                         responseCode = 400;
                     }
                 }
-                else
+                else // User wrong
                 {
                     responseHTML += "\n Couldnt find User by token";
                     responseCode = 400;
@@ -72,9 +72,9 @@ namespace Server.Server
             }
             else
             {
+                responseHTML += "\n Method wrong";
                 responseCode = 400;
             }
-
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
@@ -96,8 +96,6 @@ namespace Server.Server
             responseHTML += "\n FullBody: " + fullinfo;
             responseHTML += "\n Token: " + token;
 
-
-
             if (requesttype == "GET")
             {
                 // show deck cards
@@ -109,21 +107,21 @@ namespace Server.Server
                 }
                 int cardCount = CheckIfUserHasDeckCards(user);
 
-                if (cardCount >= 0)
+                if (cardCount >= 0) // if able to retrive cards at all
                 {
-                    if (cardCount > 0)
+                    if (cardCount > 0) // cards in acc
                     {
                         responseHTML += "\n Able to Show Deckcards";
                         responseHTML += ShowAllUserDeckCards(user);
                         responseHTML += "\n Showed DeckCards";
                     }
-                    else
+                    else // no cards in acc
                     {
                         responseHTML += "\n UNABLE to DeckShow cards, No Cards in Account";
                         responseCode = 500;
                     }
                 }
-                else
+                else // error while trying to retrive cards 
                 {
                     responseHTML += "\n Error While trying to read cards";
                     responseCode = 400;
@@ -131,7 +129,7 @@ namespace Server.Server
             }
             else if (requesttype == "PUT")
             {
-                // cahnge deck cards
+                // change deck cards
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
 
@@ -141,10 +139,12 @@ namespace Server.Server
                 temp = temp.Remove(temp.Length - 1);
                 Console.WriteLine("Card Snipping starting!");
                 Console.WriteLine(temp);
+
+                // seperating Data
                 try
                 {
                     string[] parts1 = temp.Split(",");
-                    if (parts1.Length != 4 ) // wrong count
+                    if (parts1.Length != 4) // wrong count
                     {
                         responseHTML += "Deck needs to be exactly 4 cards! You put " + parts1.Length;
                         responseHTML += "\n</body> </html>";
@@ -165,54 +165,59 @@ namespace Server.Server
                 {
                     responseHTML += "\n Too little cards";
                     responseHTML += "\n</body> </html>";
-                    response.UniqueResponse(writer, 200, description, responseHTML);
+                    response.UniqueResponse(writer, 400, description, responseHTML);
                     return;
                 }
-
 
                 if (user != null)
                 {
                     responseHTML += "\n Found User by token";
-                }
-                List<string> cardCount = GetAllDeckIds(user);
-                for (int i = 0; i < cardCount.Count; i++)
-                {
-                    if (SeeIfCardIsInTradings(cardCount[i])) // if card is up for trading fail
-                    {
-                        responseHTML += "\n ERROR \nCard:" + cardCount[i] + " is put up for trading!";
-                        responseHTML += "\n</body> </html>";
-                        response.UniqueResponse(writer, 400, description, responseHTML);
-                        return;
 
-                    }
-                }
-                if (cardCount.Count >= 0)
-                {
-                    if (cardCount.Count > 0)
+                    List<string> cardCount = GetAllDeckIds(user);
+                    for (int i = 0; i < cardCount.Count; i++)
                     {
-                        responseHTML += "\n Able to Switch";
-                        PullOutOfDeck(cardCount);
-                        responseHTML += "\n Pulled old out";
-                        PutIntoDeck(NewDeckIDs);
-                        responseHTML += "\n Put new in";
+                        if (SeeIfCardIsInTradings(cardCount[i])) // if card is up for trading fail
+                        {
+                            responseHTML += "\n ERROR \nCard:" + cardCount[i] + " is put up for trading!";
+                            responseHTML += "\n</body> </html>";
+                            response.UniqueResponse(writer, 400, description, responseHTML);
+                            return;
+
+                        }
+                    }
+                    if (cardCount.Count >= 0)
+                    {
+                        if (cardCount.Count > 0)
+                        {
+                            responseHTML += "\n Able to Switch";
+                            PullOutOfDeck(cardCount);
+                            responseHTML += "\n Pulled old out";
+                            PutIntoDeck(NewDeckIDs);
+                            responseHTML += "\n Put new in";
+                        }
+                        else
+                        {
+                            responseHTML += "\n UNABLE to read Deck cards, No Cards in Account";
+                            responseCode = 500;
+                        }
                     }
                     else
                     {
-                        responseHTML += "\n UNABLE to read Deck cards, No Cards in Account";
-                        responseCode = 500;
+                        responseHTML += "\n Error While trying to read Deckcards";
+                        responseCode = 400;
                     }
                 }
                 else
                 {
-                    responseHTML += "\n Error While trying to read Deckcards";
+                    responseHTML += "\n Couldnt get User";
                     responseCode = 400;
                 }
             }
             else
             {
+                responseHTML += "\n Method wrong";
                 responseCode = 400;
             }
-
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
@@ -236,7 +241,7 @@ namespace Server.Server
 
             if (requesttype == "GET")
             {
-                // show deck cards
+                // show deck cards plain
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
                 if (user != null)
@@ -245,33 +250,36 @@ namespace Server.Server
                 }
                 int cardCount = CheckIfUserHasDeckCards(user);
 
-                if (cardCount >= 0)
+                if (cardCount >= 0) // Could Retrive Cards
                 {
-                    if (cardCount > 0)
+                    if (cardCount > 0) // cards in acc
                     {
                         responseHTML += "\n Able to Show Deckcards";
                         responseHTML += ShowAllUserDeckCardsPlain(user);
                         responseHTML += "\n Showed DeckCards";
                     }
-                    else
+                    else// no cards in acc
                     {
                         responseHTML += "\n UNABLE to DeckShow cards, No Cards in Account";
                         responseCode = 500;
                     }
                 }
-                else
+                else// Error while trying to Retrive Cards
                 {
                     responseHTML += "\n Error While trying to read cards";
                     responseCode = 400;
                 }
             }
             else
+            {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
+            }
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
         }
-     
+
         public int CheckIfUserHasCards(UserEndpoint user)
         {
             // Connection
@@ -492,7 +500,7 @@ namespace Server.Server
             connection.Open();
 
             // command
-            for (int i = 0; i < ids.Count; i++)
+            for (int i = 0; i < ids.Count; i++) // For each Id in List
             {
 
                 using IDbCommand command = connection.CreateCommand();
@@ -516,9 +524,8 @@ namespace Server.Server
             connection.Open();
 
             // command
-            for (int i = 0; i < ids.Count; i++)
+            for (int i = 0; i < ids.Count; i++) // for each id in List
             {
-
                 using IDbCommand command = connection.CreateCommand();
                 string query = "UPDATE cards SET card_indeck = true WHERE id = @card_id";
                 command.CommandText = query;
@@ -627,9 +634,7 @@ namespace Server.Server
             command.CommandText = query;
 
             // parameters
-            //command.Parameters.AddWithValue("@Username", username);
             GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, cardId);
-
 
             var count = command.ExecuteScalar();
 
@@ -695,9 +700,7 @@ namespace Server.Server
                     card.Description = (string)reader["card_description"];
                 }
                 card.PrintCard();
-
             }
-
             return card;
         }
     }

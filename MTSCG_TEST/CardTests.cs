@@ -38,8 +38,8 @@ namespace MTSCG_TEST
             //Act
             string expectedValue = "Card";
             string actualValue = spell_Card_1.Name;
-            //Assert
 
+            //Assert
             Assert.AreEqual(expectedValue, actualValue);
 
             Assert.Pass();

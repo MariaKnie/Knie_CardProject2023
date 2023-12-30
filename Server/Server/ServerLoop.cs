@@ -12,47 +12,33 @@ namespace Knie_CardProject2023.Server
 {
     internal class ServerLoop
     {
+        static void Main(string[] args)
+        {
+            int port = 10001;
+            Console.WriteLine($"Our first simple HTTP Server http://localhost:/{port}");
 
-            static void Main(string[] args)
+            var httpServer = new TcpListener(IPAddress.Loopback, port);
+            httpServer.Start();
+
+            List<Thread> listofThreads = new List<Thread>();
+
+            GeneralRequests resetTokens = new GeneralRequests();
+            resetTokens.DeleteTokens();
+
+            while (true) // Server Loop
             {
-                int port = 10001;
-                Console.WriteLine($"Our first simple HTTP Server http://localhost:/{port}");
-
-                var httpServer = new TcpListener(IPAddress.Loopback, port);
-                httpServer.Start();
-
-                List<Thread> listofThreads= new List<Thread>();
-
-                GeneralRequests resetTokens = new GeneralRequests();
-                resetTokens.DeleteTokens();
-
-                while (true)
-                {
-                //hier dann thread
+                //for every client a thread
                 var clientSocket = httpServer.AcceptTcpClient(); //blokierende function, bis client kommt, wird ein client erzeugt
-                listofThreads.Add(new(() =>  RequestHandler.Serverthread(clientSocket)));
+                listofThreads.Add(new(() => RequestHandler.Serverthread(clientSocket)));
                 listofThreads[listofThreads.Count - 1]?.Start();
-
-                    
-                    // /user/12
-                    // /group/1/users
-                    // /group/users?sortby=name
-                    // /group/users?sortby=name&active=1
-                }
-            //TODO-------------------------------------------------------
-            //Request eigene klasse, Methode, endpunkt das alles
-            // field for content
-            // class for repsonse, dictonary
+            }
 
             //writer.Flush();
             //writer.Close();
 
-
             //join all before closing
             JoinAllThreads(listofThreads);
         }
-
-
 
         static void JoinAllThreads(List<Thread> listofThreads)
         {
@@ -61,10 +47,10 @@ namespace Knie_CardProject2023.Server
                 listofThreads[i]?.Join();
             }
         }
-        
 
 
-           
-        }
+
+
     }
+}
 

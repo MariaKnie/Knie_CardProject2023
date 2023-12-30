@@ -4,22 +4,15 @@ namespace Knie_CardProject2023
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] args) //  For testing
         {
-
             int rounds = 1;
-
             User Tom = new User("Tom", "123", 0, 0);
             User Max = new User("Max", "12345", 0, 0);
-
             
             List<User> usersList = new List<User>();
             usersList.Add(Tom); 
-            usersList.Add(Max);
-
-
-           
-
+            usersList.Add(Max);         
 
             Console.WriteLine($"Filling Stacks");
             Console.ReadLine();
@@ -28,7 +21,6 @@ namespace Knie_CardProject2023
                 Console.WriteLine($"User [{i}] {usersList[i].Username}" );
                 usersList[i].Stack.Fill_Stack();
                 Console.ReadLine();
-
 
                 while (usersList[i].Coins >=5)
                 {

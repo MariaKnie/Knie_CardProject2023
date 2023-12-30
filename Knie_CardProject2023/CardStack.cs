@@ -11,33 +11,20 @@ namespace Knie_CardProject2023
 
         private List<Card> stack = new List<Card>();
         private int max_HandOutSize = 5;
-
         public List<Card> Cards
         {
             get { return stack; }
             set { }
         }
-
-
         public void PrintStack()
         {
-            for (int i = 0; i < stack.Count; i++)
+            for (int i = 0; i < stack.Count; i++) // print each card in stack
             {
                 Console.WriteLine($"\nStack Count: {i + 1}");
-
-                if (stack[i].GetType().Name == "Monstercard")
-                {
-                    Console.Write($"Monster");
-                }
-                else
-                {
-                    Console.Write($"Spell");
-                }
+                Console.WriteLine(stack[i].CardType + "Card");
                 Console.WriteLine($"-Card: \n  Name: {stack[i].Name}\n  Damage: {stack[i].Damage}\n  Element: {stack[i].ElementType}");
-
             }
         }
-
         public virtual void Fill_Stack()
         {
             for (int i = 0; i < max_HandOutSize; i++)

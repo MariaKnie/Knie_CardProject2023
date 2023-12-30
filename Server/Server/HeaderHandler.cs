@@ -18,8 +18,7 @@ namespace Server.Server
 
             while ((line = reader.ReadLine()) != null)
             {
-                //Console.WriteLine(line); //erste line noch aufspliten und dann htttp protcol, / dann ? dann && || und dann =
-                if (line == "")
+                if (line == "") // end of  Header
                 {
                     isBody = true;
                     break;

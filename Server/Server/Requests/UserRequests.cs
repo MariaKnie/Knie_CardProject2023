@@ -32,8 +32,6 @@ namespace Server.Server.Requests
             responseHTML += "\n FullBody: " + fullinfo;
             responseHTML += "\n Token: " + token;
 
-
-
             if (requesttype == "GET")
             {
                 UserRequests ur = new UserRequests();
@@ -55,7 +53,7 @@ namespace Server.Server.Requests
                         drawchance = ((deciededmatches) / (float)user.Matches) * 100;
 
                     }
-
+                    // write stats
                     responseHTML += $"\nWins: {user.Wins}";
                     responseHTML += $"\nLoses: {user.Loses}";
                     responseHTML += $"\nDraws: {deciededmatches}";
@@ -74,9 +72,9 @@ namespace Server.Server.Requests
             }
             else
             {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
             }
-
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
@@ -107,7 +105,6 @@ namespace Server.Server.Requests
 
                     AddUsertoDb(userToEndpoint);
                     responseHTML += "\n Rgistration Complete!";
-
                 }
                 else
                 {
@@ -117,6 +114,7 @@ namespace Server.Server.Requests
             }
             else
             {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
             }
 
@@ -142,20 +140,19 @@ namespace Server.Server.Requests
 
             UserEndpoint user = GetUserByToken(token);
 
-            string temptoken = token.Substring(0, token.Length - 10); // if token matches with subpath
+            string temptoken = token.Substring(0, token.Length - 10); // if token matches with / subpath
 
             if (user != null && temptoken == subpath_user)  // see if token is used by the right user
             {
-                if (requesttype == "GET")
+                if (requesttype == "GET") // get user data
                 {
-
                     responseHTML += "\n Get User Data \n\n";
                     responseHTML += "\n { \"User\": {";
 
                     responseHTML += JsonSerializer.Serialize<UserEndpoint>(user);
                     responseHTML += "\n } \n}";
                 }
-                else if (requesttype == "PUT")
+                else if (requesttype == "PUT") 
                 {
                     if (fullinfo.Length > 0) // change user data
                     {
@@ -204,10 +201,11 @@ namespace Server.Server.Requests
                         }
 
                         bool canchange = true;
-                        if (InfoToChange_Dic.ContainsKey("username"))
+                        if (InfoToChange_Dic.ContainsKey("username")) 
                         {
-                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["username"]);
+                            canchange = !SeeIfUserIsINDB(InfoToChange_Dic["username"]);// if name is free
                         }
+
                         if (canchange)
                         {
                             ChangeUserData(user, InfoToChange_Dic);
@@ -224,6 +222,7 @@ namespace Server.Server.Requests
                 }
                 else
                 {
+                    responseHTML += "\nWrong Method";
                     responseCode = 400;
                 }
             }
@@ -234,7 +233,6 @@ namespace Server.Server.Requests
             }
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
-
         }
 
 
@@ -251,9 +249,7 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            //command.Parameters.AddWithValue("@Username", username);
             GeneralRequests.AddParameterWithValue(command, "@Username", DbType.String, username);
-
 
             var count = command.ExecuteScalar();
 
@@ -262,7 +258,6 @@ namespace Server.Server.Requests
                 Console.WriteLine("AN ERROR OCCURED");
                 return true;
             }
-
 
             if ((Int64)count > 0)
             {
@@ -274,7 +269,6 @@ namespace Server.Server.Requests
                 Console.WriteLine("Username does not exist in the database.");
                 return false;
             }
-
         }
         public void AddUsertoDb(UserEndpoint user)
         {
@@ -289,16 +283,9 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            //IDFactory factory = new IDFactory();
-            //string id = factory.generateID();
-            //Console.WriteLine($"username = {user.Username}, password = {user.Password} ");
-            //AddParameterWithValue(command, "@id", DbType.String, id);
             GeneralRequests.AddParameterWithValue(command, "@username", DbType.String, user.Username);
             GeneralRequests.AddParameterWithValue(command, "@password", DbType.String, user.Password);
             GeneralRequests.AddParameterWithValue(command, "@coins", DbType.Int32, 20);
-
-
-
 
             command.ExecuteNonQuery();
         }
@@ -376,14 +363,12 @@ namespace Server.Server.Requests
 
                     user.Image = (string)reader["image"];
                 }
-
             }
 
             return user;
         }
         public void ChangeUserData(UserEndpoint user, Dictionary<string, string> newUserdata)
         {
-
             for (int i = 0; i < newUserdata.Count; i++)
             {
                 // Connection

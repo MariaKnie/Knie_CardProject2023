@@ -42,12 +42,12 @@ namespace Server.Server.Requests
               // if active then deny
 
                 int id = UserLoginDataCheck(userToEndpoint);
-                if (id >= 0)
+                if (id >= 0) // id could be found
                 {
                     // Login Data is correct
                     responseHTML += "\n UserData Correct";
 
-                    if (!UserLoginTokenCheck(id))
+                    if (!UserLoginTokenCheck(id)) // check if already logged in
                     {
                         responseHTML += "\n User able to login";
                         // User isnt logged in yet
@@ -60,7 +60,7 @@ namespace Server.Server.Requests
                         responseCode = 400;
                     }
                 }
-                else
+                else // no id found
                 {
                     responseHTML += "\n UserData Incorrect";
                     responseCode = 400;
@@ -68,7 +68,10 @@ namespace Server.Server.Requests
 
             }
             else
+            {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
+            }
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
@@ -109,7 +112,10 @@ namespace Server.Server.Requests
                 }
             }
             else
+            {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
+            }
 
 
             responseHTML += "\n</body> </html>";
@@ -131,8 +137,6 @@ namespace Server.Server.Requests
             responseHTML += "\n FullBody: " + fullinfo;
             responseHTML += "\n Token: " + token;
 
-
-
             if (requesttype == "GET")
             {
                 UserRequests ur = new UserRequests();
@@ -140,7 +144,6 @@ namespace Server.Server.Requests
 
                 if (user != null)
                 {
-
                     responseHTML += $"\nGetting Scoreboard \n";
                     responseHTML += GetPlayerScoreboard_Wins(user);
                 }
@@ -151,7 +154,10 @@ namespace Server.Server.Requests
                 }
             }
             else
+            {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
+            }
 
 
             responseHTML += "\n</body> </html>";
@@ -193,20 +199,20 @@ namespace Server.Server.Requests
                 UserEndpoint user = ur.GetUserByToken(token);
 
                 User Carduser = new User(user.Username, user.Password, user.Wins, user.Loses, user.Id, user.Matches, user.Elo);
-                if (user != null)
+                if (user != null) // user found
                 {
                     responseHTML += "\n Checking Deck";
-
                     CardRequests cardRQ = new CardRequests();
-                    bool playAble = cardRQ.CheckEnoughDeckCards(user);
 
-                    if (!playAble)
+                    bool playAble = cardRQ.CheckEnoughDeckCards(user);
+                    if (!playAble) // if false
                     {
                         responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
                         responseHTML += "\n</body> </html>";
                         response.UniqueResponse(writer, 400, description, responseHTML);
                         return;
                     }
+
                     responseHTML += "\n Looking for Game Lobby";
                     bool foundSpot = false;
 
@@ -298,7 +304,6 @@ namespace Server.Server.Requests
             else
                 responseCode = 400;
 
-
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
 
@@ -344,7 +349,6 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            //command.Parameters.AddWithValue("@Username", username);
             AddParameterWithValue(command, "@Username", DbType.String, user.Username);
             AddParameterWithValue(command, "@Password", DbType.String, user.Password);
 
@@ -374,7 +378,6 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            //command.Parameters.AddWithValue("@Username", username);
             AddParameterWithValue(command, "@id", DbType.Int32, id);
 
             var result = command.ExecuteScalar();
@@ -401,7 +404,6 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            //command.Parameters.AddWithValue("@Username", username);
             string token = user.Username + "-mtcgToken";
             AddParameterWithValue(command, "@token", DbType.String, token);
             AddParameterWithValue(command, "@user_id", DbType.Int32, id);
@@ -449,7 +451,6 @@ namespace Server.Server.Requests
                 };
 
                 jsonToSendBack += $"\nPlace: {count}, User: {user_Read.Username}, Elo: {user_Read.Elo}";
-
             }
 
             return jsonToSendBack;
@@ -480,9 +481,7 @@ namespace Server.Server.Requests
                 };
 
                 jsonToSendBack += $"\nPlace: {count}, User: {user_Read.Username}, Wins: {user_Read.Wins}";
-
             }
-
             return jsonToSendBack;
         }
 
@@ -509,7 +508,6 @@ namespace Server.Server.Requests
                 {
                     playersOfRound[p].Wins++;
                     playersOfRound[p].ELO += 3;
-
                 }
                 else
                 {

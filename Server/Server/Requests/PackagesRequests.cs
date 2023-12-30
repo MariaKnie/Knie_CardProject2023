@@ -16,17 +16,6 @@ namespace Server.Server.Requests
 {
     internal class PackagesRequests
     {
-        public async Task PackageResponse(StreamWriter writer, string requesttype)
-        {
-            HTTP_Response response = new HTTP_Response();
-            response.UniqueResponse(writer, 200, $"PackageResponse {requesttype}", $"<html> <body> <h1> {requesttype} PackageResponse Request! </h1> </body> </html>");
-
-        }
-        public async Task PackagesRequest(StreamWriter writer, string requesttype)
-        {
-            HTTP_Response response = new HTTP_Response();
-            response.UniqueResponse(writer, 200, $"Packages {requesttype}", $"<html> <body> <h1> {requesttype} Packages Request! </h1> </body> </html>");
-        }
         public async Task TransactionsPackagesRequest(StreamWriter writer, string requesttype, Dictionary<string, string> userInfo)
         {
             HTTP_Response response = new HTTP_Response();
@@ -44,14 +33,13 @@ namespace Server.Server.Requests
             responseHTML += "\n Token: " + token;
 
 
-
             if (requesttype == "POST")
             {
-                // - 5 coind + 5 cards to stack
+                // - 5 coins, + 5 cards to stack
                 UserRequests ur = new UserRequests();
                 UserEndpoint user = ur.GetUserByToken(token);
 
-                if (user != null)
+                if (user != null) // user found
                 {
                     responseHTML += "\n Found User by token";
                     if (CheckUserAbleToBuy(user))
@@ -60,27 +48,27 @@ namespace Server.Server.Requests
                         BuyPackage(user, ref responseHTML);
                         responseHTML += "\n Bought Package";
                     }
-                    else
+                    else // less than 5 coins in acc
                     {
                         responseHTML += "\n UNABLE to Buy Package, too little coins";
                         responseCode = 500;
                     }
                 }
-                else
+                else // couldnt find user
                 {
                     responseHTML += "\n Couldnt find User by token";
                     responseCode = 400;
                 }
             }
             else
+            {
+                responseHTML += "\n Wrong Method";
                 responseCode = 400;
-
+            }
 
             responseHTML += "\n</body> </html>";
             response.UniqueResponse(writer, responseCode, description, responseHTML);
-        }
-
-       
+        } 
         public bool CheckUserAbleToBuy(UserEndpoint user)
         {
             if (user == null)
@@ -93,12 +81,10 @@ namespace Server.Server.Requests
                 return false;
             }
 
-
             return true;
         }
         public void BuyPackage(UserEndpoint user, ref string html)
         {
-
             // Connection
             var connString = "Host=localhost; Username=postgres; Password=postgres; Database=mydb";
             using IDbConnection connection = new NpgsqlConnection(connString);
@@ -117,7 +103,7 @@ namespace Server.Server.Requests
             // Add Package to Userstack
             CardPackages package = new CardPackages();
             PackageEndPoint newPackage = new PackageEndPoint();
-               newPackage.packageCard = package.CreatePackageDB();
+            newPackage.packageCard = package.CreatePackageDB();
 
             CardRequests cr = new CardRequests();
             int DeckCount = cr.CheckIfUserHasDeckCards(user);
@@ -139,7 +125,6 @@ namespace Server.Server.Requests
                 AddCardtoCardTable(newPackage.packageCard[i], user.Id, todeck);
                 html += $"\n {newPackage.packageCard[i].PrintCard()}";
             }
-
         }
         public void AddCardtoCardTable(Card newCard, int userid, bool deck)
         {
@@ -169,12 +154,6 @@ namespace Server.Server.Requests
 
             newCard.PrintCard();
             command.ExecuteNonQuery();
-        }
-        public async Task SpecificTransactionsPackagesRequest(StreamWriter writer, string Http_type)
-        {
-            HTTP_Response response = new HTTP_Response();
-            response.UniqueResponse(writer, 200, $" Specific TransactionsPackagesRequest {Http_type}", $"<html> <body> <h1> {Http_type} Specific TransactionsPackagesRequest Request! </h1> </body> </html>");
-
         }
 
     }

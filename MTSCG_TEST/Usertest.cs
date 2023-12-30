@@ -16,7 +16,6 @@ namespace MTSCG_TEST
         {
              max = new User("Max", "Pw", 0, 0);
              tom = new User("Tom", "Pw", 0, 0);
-
         }
 
         [Test]
@@ -32,7 +31,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue, actualValue);
             //Assert.That(actualValue, Is.EqualTo(expectedValue));
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]

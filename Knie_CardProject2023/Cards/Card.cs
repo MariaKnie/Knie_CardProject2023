@@ -32,7 +32,6 @@ namespace Knie_CardProject2023
             get { return damage; }
             set { damage = value; }
         }
-
         public string CardType
         {
             get { return card_type; }
@@ -48,14 +47,10 @@ namespace Knie_CardProject2023
             get { return description; }
             set { description = value; }
         }
-        public virtual void Attack()
-        { 
-        
-        }
 
         public virtual string PrintCard()
         {
-            string stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
+            string stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
             Console.WriteLine(stats);
             return stats;
         }

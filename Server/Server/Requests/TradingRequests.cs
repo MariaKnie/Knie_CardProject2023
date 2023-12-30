@@ -35,14 +35,12 @@ namespace Server.Server.Requests
             UserEndpoint user = uRq.GetUserByToken(token);
 
 
-            if (user != null)  // see if token is used by the right user
+            if (user != null) // user found
             {
                 if (requesttype == "GET")
                 {
-
                     responseHTML += "\n Get Trade Data \n\n";
                     responseHTML += GetAllTrades();
-
                 }
                 else if (requesttype == "POST")
                 {
@@ -103,12 +101,18 @@ namespace Server.Server.Requests
                             canAdd = !SeeIfTradeIsINDB(InfoToChange_Dic["cardtotrade"]);
 
                             CardRequests crq = new CardRequests();
+
+                            // see if card really belongs to tbe aledged user
                             Card myCard = crq.GetUserSpecificCards(InfoToChange_Dic["cardtotrade"], user.Id); // my card
                             if (myCard.Name == null)
                             {
+                                canAdd = false;
                                 responseHTML += "\nCard couldnt be found";
                                 responseHTML += "\nMake sure card is not in deck";
-                                canAdd = false;
+                                responseHTML += "\n</body> </html>";
+                                responseCode = 400;
+                                response.UniqueResponse(writer, responseCode, description, responseHTML);
+                                return;
                             }
                             Console.WriteLine("Bool = " + canAdd);
                         }
@@ -117,7 +121,7 @@ namespace Server.Server.Requests
                             canAdd = false;
                         }
 
-                        if (canAdd)
+                        if (canAdd) // card belongs to user and is not in deck
                         {
                             TradeEndpoint newtrade = new TradeEndpoint();
                             newtrade.id = InfoToChange_Dic["id"];
@@ -135,12 +139,13 @@ namespace Server.Server.Requests
                                 responseHTML += "\n</body> </html>";
                                 responseCode = 400;
                                 response.UniqueResponse(writer, responseCode, description, responseHTML);
+                                return;
                             }
                             AddNewTrade(newtrade);
                         }
                         else
                         {
-                            responseHTML += "\n OR Card is already in db";
+                            responseHTML += "\n Card is already in db";
                         }
                     }
                     else
@@ -245,6 +250,11 @@ namespace Server.Server.Requests
                         responseHTML += "\nTrade not found Or Author of Trade";
                     }
                 }
+                else
+                {
+                    responseHTML += "\n Wrong Method";
+                    responseCode = 400;
+                }
             }
             else
             {
@@ -268,9 +278,7 @@ namespace Server.Server.Requests
             command.CommandText = query;
 
             // parameters
-            //command.Parameters.AddWithValue("@Username", username);
             GeneralRequests.AddParameterWithValue(command, "@card_id", DbType.String, card_id);
-
 
             var count = command.ExecuteScalar();
 
@@ -279,7 +287,6 @@ namespace Server.Server.Requests
                 Console.WriteLine("AN ERROR OCCURED");
                 return true;
             }
-
 
             if ((Int64)count > 0)
             {

@@ -9,7 +9,7 @@ namespace Knie_CardProject2023
 {
     public class User
     {
-        private static int nextUserid = 1;
+        private static int nextUserid = 1; // was for testing without db
 
         private int id;
         private string username;
@@ -19,7 +19,6 @@ namespace Knie_CardProject2023
         private int coins = 20;
         private int elo = 100;
         private int matches;
-
 
         private CardDeck deck = new CardDeck();
         private CardStack stack = new CardStack();
@@ -31,7 +30,6 @@ namespace Knie_CardProject2023
             this.password = password;
             this.wins = wins;
             this.loses = loses;
-
         }
         public User(string username, string password, int wins, int loses, int id, int matches, int eLO)
         {
@@ -55,13 +53,12 @@ namespace Knie_CardProject2023
             this.stack = stack;
             this.elo = eLO;
         }
-
+      
         public int ELO
         {
             get { return elo; }
             set { elo = value; }
         }
-
         public int Matches
         {
             get { return matches; }
@@ -99,7 +96,6 @@ namespace Knie_CardProject2023
             get { return coins; }
             set { coins = value; }
         }
-
         public CardDeck Deck
         {
             get { return deck; }
@@ -109,19 +105,6 @@ namespace Knie_CardProject2023
         {
             get { return stack; }
             set { }
-        }
-
-        public void DrawCard()
-        {
-
-        }
-        public void RemoveCard()
-        {
-
-        }
-        public void TradeCard()
-        {
-
         }
 
     }

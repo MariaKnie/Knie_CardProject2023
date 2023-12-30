@@ -73,7 +73,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -105,7 +104,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -137,7 +135,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
 
@@ -171,7 +168,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -204,7 +200,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
 
@@ -240,7 +235,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -274,7 +268,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -308,7 +301,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -342,7 +334,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         //######################## Monster Cards
@@ -376,7 +367,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -408,7 +398,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -440,7 +429,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -472,7 +460,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -504,7 +491,6 @@ namespace MTSCG_TEST
             //Assert
             Assert.AreEqual(expectedValue, actualValue);
             Assert.Pass();
-            //Assert.Fail();
         }
 
 
@@ -542,7 +528,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -575,7 +560,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
 
@@ -610,7 +594,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
         [Test]
         public void Test_Spell_effect_calculation_ElectroFire()
@@ -642,7 +625,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
 
@@ -682,7 +664,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -719,7 +700,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -756,7 +736,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -793,7 +772,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
 
         [Test]
@@ -830,7 +808,6 @@ namespace MTSCG_TEST
             Assert.AreEqual(expectedValue1, ef1);
             Assert.AreEqual(expectedValue2, ef2);
             Assert.Pass();
-            //Assert.Fail();
         }
     }
 }

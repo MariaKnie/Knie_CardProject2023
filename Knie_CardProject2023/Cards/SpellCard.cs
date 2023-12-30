@@ -22,15 +22,8 @@ namespace Knie_CardProject2023
             this.element_type = element_type;
             this.description = description;
         }
-
-        public override void Attack()
-        {
-            base.Attack();
-        }
-
         public override SpellCard GenerateCard()
         {
-
             Random rnd = new Random();
             int enumCount = Enum.GetNames(typeof(Enum_ElementTypes)).Length;
             int num = rnd.Next(enumCount);
@@ -67,7 +60,7 @@ namespace Knie_CardProject2023
             }
 
 
-            Console.WriteLine($" Added Spell-Card: \n  Name: {newCard.name}\n  Damage: {newCard.damage}\n  Element: {newCard.element_type}");
+            Console.WriteLine($" Added Spell-Card: \n  Name: {newCard.name}\n  Damage: {newCard.damage}\n  Element: {newCard.element_type}\n  Description: {newCard.description}");
 
             return newCard;
         }

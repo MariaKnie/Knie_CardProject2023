@@ -10,13 +10,6 @@ namespace Knie_CardProject2023
 {
     public class Monstercard : Card
     {
-
-
-        public override void Attack()
-        {
-            base.Attack();
-        }
-
         public Monstercard()
         {
 
@@ -88,7 +81,7 @@ namespace Knie_CardProject2023
                 newCard.element_type = Enum_ElementTypes.Fire.ToString();
             }
 
-            Console.WriteLine($" Added Monster-Card: \n  Name: {newCard.name}\n  Damage: {newCard.damage}\n  Element: {newCard.element_type}"); 
+            Console.WriteLine($" Added Monster-Card: \n  Name: {newCard.name}\n  Damage: {newCard.damage}\n  Element: {newCard.element_type}\n  Description: {newCard.description}"); 
             return newCard;
         }
     }
