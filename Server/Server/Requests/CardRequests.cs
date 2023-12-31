@@ -146,7 +146,7 @@ namespace Server.Server
                     string[] parts1 = temp.Split(",");
                     if (parts1.Length != 4) // wrong count
                     {
-                        responseHTML += "Deck needs to be exactly 4 cards! You put " + parts1.Length;
+                        responseHTML += "\nDeck needs to be exactly 4 cards! You put " + parts1.Length;
                         responseHTML += "\n</body> </html>";
                         response.UniqueResponse(writer, 400, description, responseHTML);
                         return;
@@ -184,7 +184,7 @@ namespace Server.Server
                             return;
 
                         }
-                        Card temp2 =  GetUserSpecificCards(cardCount[i], user.Id); // see if card belongs to user
+                        Card temp2 =  GetUserSpecificCards(cardCount[i], user.Id, false, false); // see if card belongs to user
                         if (temp2.Name == null)
                         {
                             responseHTML += "\n ERROR \nCard:" + cardCount[i] + " not found!";
@@ -655,19 +655,19 @@ namespace Server.Server
 
             if ((Int64)count > 0)
             {
-                Console.WriteLine("CardId exists in the database.");
+                Console.WriteLine("CardId exists in the Trading database.");
                 return true;
             }
             else
             {
-                Console.WriteLine("CardId does not exist in the database.");
+                Console.WriteLine("CardId does not exist in the Trading database.");
                 return false;
             }
         }
 
 
         // For Trade
-        public Card GetUserSpecificCards(string card_id, int user_id)
+        public Card GetUserSpecificCards(string card_id, int user_id, bool deck, bool checkdeck)
         {
             PackageEndPoint packageEndPoint = new PackageEndPoint();
             // Connection
@@ -677,12 +677,22 @@ namespace Server.Server
 
             // command
             using IDbCommand command = connection.CreateCommand();
-            string query = "SELECT * FROM cards WHERE id = @id AND card_indeck = false AND user_id = @user_id";
+            string query = "";
+            if (checkdeck)
+            {
+                query = "SELECT * FROM cards WHERE id = @id AND card_indeck = @deck AND user_id = @user_id";
+            }
+            else
+            {
+                query = "SELECT * FROM cards WHERE id = @id AND user_id = @user_id";
+            }
+
             command.CommandText = query;
 
             // parameters
             GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, card_id);
             GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user_id);
+            GeneralRequests.AddParameterWithValue(command, "@deck", DbType.Boolean, deck);
 
             using IDataReader reader = command.ExecuteReader();
             Console.WriteLine("READING CARD FROM PLAYER " + card_id);

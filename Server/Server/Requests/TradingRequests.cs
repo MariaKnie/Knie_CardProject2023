@@ -103,7 +103,7 @@ namespace Server.Server.Requests
                             CardRequests crq = new CardRequests();
 
                             // see if card really belongs to tbe aledged user
-                            Card myCard = crq.GetUserSpecificCards(InfoToChange_Dic["cardtotrade"], user.Id); // my card
+                            Card myCard = crq.GetUserSpecificCards(InfoToChange_Dic["cardtotrade"], user.Id, false, true); // my card, not in deck
                             if (myCard.Name == null)
                             {
                                 canAdd = false;
@@ -206,7 +206,7 @@ namespace Server.Server.Requests
                             card_id = card_id.Remove(card_id.Length - 1);
 
                             CardRequests crq = new CardRequests();
-                            Card myCard = crq.GetUserSpecificCards(card_id, user.Id); // my card
+                            Card myCard = crq.GetUserSpecificCards(card_id, user.Id, false, true); // my card, not in deck
 
                             if (myCard.Name != null) // card could be found
                             {

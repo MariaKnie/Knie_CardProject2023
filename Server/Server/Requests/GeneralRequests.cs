@@ -207,7 +207,7 @@ namespace Server.Server.Requests
                     bool playAble = cardRQ.CheckEnoughDeckCards(user);
                     if (!playAble) // if false
                     {
-                        responseHTML += "Card Deck needs to be modified! Error: Too little Cards";
+                        responseHTML += "\nCard Deck needs to be modified! Error: Too little Cards";
                         responseHTML += "\n</body> </html>";
                         response.UniqueResponse(writer, 400, description, responseHTML);
                         return;
