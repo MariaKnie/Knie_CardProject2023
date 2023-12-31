@@ -173,32 +173,33 @@ namespace Server.Server
                 {
                     responseHTML += "\n Found User by token";
 
-                    List<string> cardCount = GetAllDeckIds(user);
-                    for (int i = 0; i < cardCount.Count; i++)
+                    List<string> old_cardCount = GetAllDeckIds(user);
+                    for (int i = 0; i < NewDeckIDs.Count; i++)
                     {
-                        if (SeeIfCardIsInTradings(cardCount[i])) // if card is up for trading fail
+                        if (SeeIfCardIsInTradings(NewDeckIDs[i])) // if card is up for trading fail
                         {
-                            responseHTML += "\n ERROR \nCard:" + cardCount[i] + " is put up for trading!";
+                            responseHTML += "\n ERROR \nCard:" + NewDeckIDs[i] + " is put up for trading!";
                             responseHTML += "\n</body> </html>";
                             response.UniqueResponse(writer, 400, description, responseHTML);
                             return;
 
                         }
-                        Card temp2 =  GetUserSpecificCards(cardCount[i], user.Id, false, false); // see if card belongs to user
-                        if (temp2.Name == null)
+                        Card temp2 =  GetUserSpecificCards(NewDeckIDs[i], user.Id, false, false); // see if card belongs to user
+                        if (temp2.Name == "" || temp2.Name == null || temp2.Name.Length <1)
                         {
-                            responseHTML += "\n ERROR \nCard:" + cardCount[i] + " not found!";
+                            responseHTML += "\n ERROR \nCard:" + NewDeckIDs[i] + " not found!";
                             responseHTML += "\n</body> </html>";
                             response.UniqueResponse(writer, 400, description, responseHTML);
                             return;
                         }
                     }
-                    if (cardCount.Count >= 0)
+
+                    if (old_cardCount.Count >= 0)
                     {
-                        if (cardCount.Count > 0)
+                        if (old_cardCount.Count > 0)
                         {
                             responseHTML += "\n Able to Switch";
-                            PullOutOfDeck(cardCount);
+                            PullOutOfDeck(old_cardCount);
                             responseHTML += "\n Pulled old out";
                             PutIntoDeck(NewDeckIDs);
                             responseHTML += "\n Put new in";
@@ -389,6 +390,7 @@ namespace Server.Server
                 readCard.PrintCard();
                 packageEndPoint.package.Add(readCard);
                 jsonToSendBack += JsonSerializer.Serialize<CardEndpoint>(readCard);
+                jsonToSendBack += "\n";
             }
             Console.WriteLine();
             jsonToSendBack += "\n}\n}";
@@ -440,6 +442,7 @@ namespace Server.Server
                 readCard.PrintCard();
                 packageEndPoint.package.Add(readCard);
                 jsonToSendBack += JsonSerializer.Serialize<CardEndpoint>(readCard);
+                jsonToSendBack += "\n";
             }
             Console.WriteLine();
             jsonToSendBack += "\n}\n}";
@@ -681,6 +684,7 @@ namespace Server.Server
             if (checkdeck)
             {
                 query = "SELECT * FROM cards WHERE id = @id AND card_indeck = @deck AND user_id = @user_id";
+                GeneralRequests.AddParameterWithValue(command, "@deck", DbType.Boolean, deck);
             }
             else
             {
@@ -692,13 +696,11 @@ namespace Server.Server
             // parameters
             GeneralRequests.AddParameterWithValue(command, "@id", DbType.String, card_id);
             GeneralRequests.AddParameterWithValue(command, "@user_id", DbType.Int32, user_id);
-            GeneralRequests.AddParameterWithValue(command, "@deck", DbType.Boolean, deck);
 
             using IDataReader reader = command.ExecuteReader();
             Console.WriteLine("READING CARD FROM PLAYER " + card_id);
 
             SpellCard card = new SpellCard();
-
             while (reader.Read())
             {
                 card = new()

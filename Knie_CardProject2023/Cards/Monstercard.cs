@@ -27,7 +27,7 @@ namespace Knie_CardProject2023
         {
             Random rnd = new Random();
             int enumCount = Enum.GetNames(typeof(Enum_Monster)).Length;
-            int num = rnd.Next(enumCount);
+            int num = rnd.Next(enumCount);  
 
             Monstercard newCard = new Monstercard();
             newCard.CardType = Enum_CardTypes.Monster.ToString();

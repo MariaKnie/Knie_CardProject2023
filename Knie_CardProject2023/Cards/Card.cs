@@ -50,7 +50,14 @@ namespace Knie_CardProject2023
 
         public virtual string PrintCard()
         {
-            string stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
+            string stats;
+            if (id != null)
+            {
+                stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
+            }
+            else
+                stats = $"Card: Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
+
             Console.WriteLine(stats);
             return stats;
         }
