@@ -337,6 +337,39 @@ namespace MTSCG_TEST
             Assert.Pass();
         }
 
+        [Test]
+        public void Test_Spell_ElectroFire()
+        {
+            // Pattern AAA
+            // Arrange
+            spell_Card_1.Damage = 20;
+            spell_Card_2.Damage = 20;
+            spell_Card_1.ElementType = Enum_ElementTypes.Electro.ToString();
+            spell_Card_2.ElementType = Enum_ElementTypes.Fire.ToString();
+            spell_Card_1.CardType = Enum_CardTypes.Spell.ToString();
+            spell_Card_2.CardType = Enum_CardTypes.Spell.ToString();
+
+            max.Deck.Cards.Clear();
+            tom.Deck.Cards.Clear();
+
+            max.Deck.Cards.Add(spell_Card_1);
+            tom.Deck.Cards.Add(spell_Card_2);
+
+            List<User> players = new List<User>();
+            players.Add(max);
+            players.Add(tom);
+
+            //Act
+            int expectedValue = 0;
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
+
+            Console.WriteLine(actualValue);
+
+            //Assert
+            Assert.AreEqual(expectedValue, actualValue);
+            Assert.Pass();
+        }
+
         //######################## Monster Cards
 
         [Test]

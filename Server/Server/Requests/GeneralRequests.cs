@@ -190,6 +190,7 @@ namespace Server.Server.Requests
             int posinPlayList = 0;
 
             int responseCode = 200;
+            string log_pieces = "";
 
             Console.WriteLine("- Lobbycount : " + playerLobbylist.Count);
 
@@ -255,6 +256,8 @@ namespace Server.Server.Requests
                     }
                     mutex_Playerlist.ReleaseMutex();
 
+                    responseHTML += $"\n{user.Username} LOG:";
+
                     if (battle) // start battle, last player to join stats battle
                     {
                         string battlelog = "";
@@ -263,7 +266,7 @@ namespace Server.Server.Requests
 
                         responseHTML += "\n Battle Begin!";
                         int status = Game.GameLoop(playersOfRound, 0, ref battlelog); // Actual Battle
-
+                        mutex_GameLog.WaitOne();
                         GameLog[posinPlayList].Add("GameLog", battlelog);
                         if (status < 0) // Game return status, errorcodes
                         {
@@ -289,6 +292,7 @@ namespace Server.Server.Requests
                         }
 
                         GameLog[posinPlayList]["Battle"] = "done"; // cue for first player
+                        mutex_GameLog.ReleaseMutex();
                     }
 
                     while (GameLog[posinPlayList]["Battle"] != "done") //waiting for second player
@@ -296,9 +300,11 @@ namespace Server.Server.Requests
                         //Console.WriteLine("\n Waiting for Player");
                     }
                     responseHTML += "\n\n";
-                    responseHTML += GameLog[posinPlayList]["GameLog"]; // players get Game log
-                    responseHTML += "\n\n";
-                    responseHTML += GameLog[posinPlayList]["Log"]; // players get battle log
+
+                    // players get battle log
+                     log_pieces = $"{GameLog[posinPlayList]["GameLog"]} {GameLog[posinPlayList]["Log"]} \n\n";
+
+                    responseHTML += log_pieces;
                     responseHTML += "\n\n";
                 }
                 else

@@ -56,9 +56,25 @@ namespace Knie_CardProject2023
                 stats = $"\n Card:\n  id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
             }
             else
+            {
                 stats = $"\n Card:\n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
+            }
 
             Console.WriteLine(stats);
+            return stats;
+        }
+
+        public virtual string PrintCard_NO_CW()
+        {
+            string stats;
+            if (id != null)
+            {
+                stats = $"\n Card:\n  id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
+            }
+            else
+            {
+                stats = $"\n Card:\n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
+            }
             return stats;
         }
 

@@ -44,12 +44,12 @@ namespace Knie_CardProject2023.Logic
             printround += stars;
 
             printround += player_0;
-            printround +=  usersList[0].Deck.Cards[num_0].PrintCard();
+            printround +=  usersList[0].Deck.Cards[num_0].PrintCard_NO_CW();
 
             printround += versus;
 
             printround += player_1;
-            printround += usersList[1].Deck.Cards[num_1].PrintCard();
+            printround += usersList[1].Deck.Cards[num_1].PrintCard_NO_CW();
 
             printround += stars;
 
