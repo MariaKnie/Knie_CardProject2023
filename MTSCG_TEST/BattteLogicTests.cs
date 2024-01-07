@@ -17,6 +17,7 @@ namespace MTSCG_TEST
         private Monstercard monster_Card_2 = new Monstercard();
         private SpellCard spell_Card_1 = new SpellCard();
         private SpellCard spell_Card_2 = new SpellCard();
+        string battleLog = "";
 
         [SetUp]
         public void Setup() //variables
@@ -66,7 +67,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 0;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -97,7 +98,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -128,7 +129,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = -1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -160,7 +161,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = max.Deck.Cards.Count+1;
-            Game.CompareCards(players, 0);
+            Game.CompareCards(players, 0, ref battleLog);
             int actualValue = max.Deck.Cards.Count;
 
             Console.WriteLine(actualValue);
@@ -192,7 +193,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = tom.Deck.Cards.Count -1;
-            Game.CompareCards(players, 0);
+            Game.CompareCards(players, 0, ref battleLog);
             int actualValue = tom.Deck.Cards.Count;
 
             Console.WriteLine(actualValue);
@@ -228,7 +229,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -261,7 +262,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = -1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -294,7 +295,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -327,7 +328,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 0;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -360,7 +361,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 0;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -391,7 +392,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = 1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -422,7 +423,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = -1;
-            int actualValue = Game.CompareCards(players, 0);
+            int actualValue = Game.CompareCards(players, 0, ref battleLog);
 
             Console.WriteLine(actualValue);
 
@@ -453,7 +454,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = max.Deck.Cards.Count+1;
-            Game.CompareCards(players, 0);
+            Game.CompareCards(players, 0, ref battleLog);
             int actualValue = max.Deck.Cards.Count;
 
 
@@ -484,7 +485,7 @@ namespace MTSCG_TEST
 
             //Act
             int expectedValue = tom.Deck.Cards.Count - 1;
-            Game.CompareCards(players, 0);
+            Game.CompareCards(players, 0, ref battleLog);
             int actualValue = tom.Deck.Cards.Count;
 
 
@@ -516,7 +517,7 @@ namespace MTSCG_TEST
             cards.Add(spell_Card_1);
             cards.Add(spell_Card_2);
 
-            Game.CheckEffect(cards, ref ef1, ref ef2);
+            Game.CheckEffect(cards, ref ef1, ref ef2, ref battleLog);
             //Act
             float expectedValue1 = 2f;
             float expectedValue2 = 0.5f;
@@ -548,7 +549,7 @@ namespace MTSCG_TEST
             cards.Add(spell_Card_1);
             cards.Add(spell_Card_2);
 
-            Game.CheckEffect(cards, ref ef1, ref ef2);
+            Game.CheckEffect(cards, ref ef1, ref ef2, ref battleLog);
             //Act
             float expectedValue1 = 1f;
             float expectedValue2 = 1f;
@@ -582,7 +583,7 @@ namespace MTSCG_TEST
             cards.Add(spell_Card_1);
             cards.Add(spell_Card_2);
 
-            Game.CheckEffect(cards, ref ef1, ref ef2);
+            Game.CheckEffect(cards, ref ef1, ref ef2, ref battleLog);
             //Act
             float expectedValue1 = 2f;
             float expectedValue2 = 0.25f;
@@ -613,7 +614,7 @@ namespace MTSCG_TEST
             cards.Add(spell_Card_1);
             cards.Add(spell_Card_2);
 
-            Game.CheckEffect(cards, ref ef1, ref ef2);
+            Game.CheckEffect(cards, ref ef1, ref ef2, ref battleLog);
             //Act
             float expectedValue1 = 0.75f;
             float expectedValue2 = 0.6f;

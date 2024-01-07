@@ -9,7 +9,8 @@ namespace Knie_CardProject2023
             int rounds = 1;
             User Tom = new User("Tom", "123", 0, 0);
             User Max = new User("Max", "12345", 0, 0);
-            
+            string battlelog = "";
+
             List<User> usersList = new List<User>();
             usersList.Add(Tom); 
             usersList.Add(Max);         
@@ -38,8 +39,8 @@ namespace Knie_CardProject2023
                 }    
             } 
 
-            Game.FillDecks(usersList);
-            Game.GameLoop(usersList, rounds);
+            Game.FillDecks(usersList, ref battlelog);
+            Game.GameLoop(usersList, rounds, ref battlelog);
        
         }
     }

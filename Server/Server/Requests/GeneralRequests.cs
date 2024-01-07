@@ -257,12 +257,14 @@ namespace Server.Server.Requests
 
                     if (battle) // start battle, last player to join stats battle
                     {
+                        string battlelog = "";
                         List<User> playersOfRound = playerLobbylist[posinPlayList]; // get user in lobby
                         GetPlayers_DecksIDs(playersOfRound, posinPlayList); // get Player card ids
 
                         responseHTML += "\n Battle Begin!";
-                        int status = Game.GameLoop(playersOfRound, 0); // Actual Battle
+                        int status = Game.GameLoop(playersOfRound, 0, ref battlelog); // Actual Battle
 
+                        GameLog[posinPlayList].Add("GameLog", battlelog);
                         if (status < 0) // Game return status, errorcodes
                         {
                             if (status == -1) // draw
@@ -293,7 +295,11 @@ namespace Server.Server.Requests
                     {
                         //Console.WriteLine("\n Waiting for Player");
                     }
+                    responseHTML += "\n\n";
+                    responseHTML += GameLog[posinPlayList]["GameLog"]; // players get Game log
+                    responseHTML += "\n\n";
                     responseHTML += GameLog[posinPlayList]["Log"]; // players get battle log
+                    responseHTML += "\n\n";
                 }
                 else
                 {

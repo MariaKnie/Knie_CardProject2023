@@ -53,10 +53,10 @@ namespace Knie_CardProject2023
             string stats;
             if (id != null)
             {
-                stats = $"Card: id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
+                stats = $"\n Card:\n  id: {id} \n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
             }
             else
-                stats = $"Card: Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n Description: {Description}";
+                stats = $"\n Card:\n  Name: {Name}\n  Damage: {Damage}\n  Element: {ElementType}\n  Description: {Description}";
 
             Console.WriteLine(stats);
             return stats;
